@@ -9,7 +9,7 @@
 ### 1. Clone repository
 
 ```bash
-git clone https://github.com/BinhTurtle/DO-AN-CNPM
+git clone https://github.com/ClearWind9u/Website_TKVL.git
 ```
 
 ### 2. Cài đặt dependencies
@@ -26,3 +26,11 @@ npm install
 ```bash
 npm run dev
 ```
+
+### 4. Thông tin hệ thống
+
+- **Frontend** chạy trên **port 5173**.
+- **Tài khoản giả lập (fakeUser):**
+  - **Email:** test@gmail.com
+  - **Password:** 123
+
