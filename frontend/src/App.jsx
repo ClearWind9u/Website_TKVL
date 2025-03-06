@@ -29,7 +29,7 @@ const App = () => {
           <Route path="/login" element={<Login login={login} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<Navigate to="/" />} /> {/* Điều hướng về trang chủ nếu đường dẫn sai */}
+          <Route path="*" element={<Navigate to="/" />} />
         </Routes>
         <Footer />
       </div>
