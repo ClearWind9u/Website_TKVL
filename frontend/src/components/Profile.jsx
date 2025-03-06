@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UserContext from "../userContext/userContext";
 import { useNavigate } from "react-router-dom";
-profileLocal ={
+var profileLocal ={
   Name: "Tran Thanh Phong",
   email: "abc@GiMailShirt.com",
   CCCD: 123123123,
@@ -17,7 +17,7 @@ profileLocal ={
   }
 }
 const Profile = () => {
-  const [profile, setProfile] = useState({profileLocal});
+  const [profile, setProfile] = useState(profileLocal);
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadError, setUploadError] = useState("");
@@ -96,7 +96,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="flex flex-col w-full items-center text-[#3C3C3C] border-[#00000000] gap-10">
+    <div className="flex flex-col w-full items-center text-[#3C3C3C] border-[#00000000] gap-10 mb-3">
       <h1 className="text-[32px] font-bold mt-8 text-center">
         Thông Tin Tài Khoản
       </h1>
