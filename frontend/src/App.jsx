@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import Login from './components/Login';  
 import Register from './components/Register';
 import Profile from './components/Profile';
+import JobHome from './components/JobHome';
 
 const App = () => {
   const [user, setUser] = useState(null); // Giả lập trạng thái đăng nhập
@@ -29,7 +30,8 @@ const App = () => {
           <Route path="/login" element={<Login login={login} />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="/ViewProfile" element={<JobHome />} />
+          <Route path="*" element={<Navigate to="/" />} /> {/* Điều hướng về trang chủ nếu đường dẫn sai */}
         </Routes>
         <Footer />
       </div>
