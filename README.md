@@ -31,6 +31,12 @@ npm run dev
 
 - **Frontend** chạy trên **port 5173**.
 - **Tài khoản giả lập (fakeUser):**
-  - **Email:** test@gmail.com
-  - **Password:** 123
-
+  - **Người tìm việc**
+    - **Email:** jobseeker@gmail.com
+    - **Password:** 123
+  - **Nhà tuyển dụng**
+    - **Email:** recruiter@gmail.com
+    - **Password:** 456
+  - **Quản trị viên**
+    - **Email:** admin@gmail.com
+    - **Password:** 789
