@@ -4,16 +4,33 @@ import { useNavigate } from "react-router-dom";
 const Login = ({ login }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("jobseeker");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
   // Dữ liệu user giả lập
-  const fakeUser = {
-    id: 1,
-    name: "test",
-    email: "test@gmail.com",
-    password: "123",
-    role: "jobseeker",
+  const fakeUsers = {
+    jobseeker: {
+      id: 1,
+      name: "Nguyễn Văn A",
+      email: "jobseeker@gmail.com",
+      password: "123",
+      role: "jobseeker",
+    },
+    recruiter: {
+      id: 2,
+      name: "Công ty XYZ",
+      email: "recruiter@gmail.com",
+      password: "456",
+      role: "recruiter",
+    },
+    admin: {
+      id: 3,
+      name: "Quản lí",
+      email: "admin@gmail.com",
+      password: "789",
+      role: "admin",
+    },
   };
 
   const handleLogin = (e) => {
@@ -25,54 +42,73 @@ const Login = ({ login }) => {
       return;
     }
 
-    // Kiểm tra xác thực tài khoản
-    if (email === fakeUser.email && password === fakeUser.password) {
-      login(fakeUser); // Cập nhật trạng thái đăng nhập
-      navigate("/jobseeker"); // Chuyển hướng sau khi login
+    // Kiểm tra xác thực tài khoản theo vai trò đã chọn
+    const user = fakeUsers[role];
+    if (user && email === user.email && password === user.password) {
+      login(user);
+      navigate(role === "jobseeker" ? "/jobseeker" : "/employer");
     } else {
-      setError("Email hoặc mật khẩu không đúng!"); // Hiển thị lỗi
+      setError("Email hoặc mật khẩu không đúng!");
     }
   };
 
   return (
-    <div className="flex flex-col items-center w-full max-w-md mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Đăng nhập</h1>
-      {error && <p className="text-red-500">{error}</p>}
-      <form onSubmit={handleLogin} className="w-full space-y-4">
-        {/* Email */}
-        <div>
-          <label className="block font-semibold mb-1">Email:</label>
-          <input
-            type="email"
-            placeholder="Nhập email của bạn"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          />
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg flex w-[900px]">
+        {/* Phần Form */}
+        <div className="flex-1 pr-8">
+          <h1 className="text-5xl font-bold text-white mb-2" style={{ WebkitTextStroke: "0.25px black" }}>Tìm việc</h1>
+          <p className="text-xl mb-6">đi bé ơi, không là bốc cớt ăn đó</p>
+          <h2 className="text-xl font-semibold mb-4">Đăng nhập</h2>
+
+          {error && <p className="text-red-500 mb-2">{error}</p>}
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            {/* Chọn Role */}
+            <select
+              className="w-full p-2 border rounded bg-white"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <option value="jobseeker">Người tìm việc</option>
+              <option value="recruiter">Nhà tuyển dụng</option>
+              <option value="admin">Quản trị viên</option>
+            </select>
+
+            {/* Email */}
+            <input
+              type="email"
+              name="email"
+              placeholder="Email (xxxxx@gmail.com)"
+              className="w-full p-2 border rounded"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+
+            {/* Password */}
+            <input
+              type="password"
+              name="password"
+              placeholder="Mật khẩu"
+              className="w-full p-2 border rounded"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+
+            {/* Nút Đăng nhập */}
+            <button type="submit" className="w-full bg-black text-white py-2 rounded">
+              Đăng nhập
+            </button>
+          </form>
         </div>
 
-        {/* Password */}
-        <div>
-          <label className="block font-semibold mb-1">Mật khẩu:</label>
-          <input
-            type="password"
-            placeholder="Nhập mật khẩu"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          />
+        {/* Phần Ảnh */}
+        <div className="flex-1">
+          <img src="../public/login.jpg" alt="Đăng nhập" className="w-full h-full object-cover rounded-3xl border" />
         </div>
-
-        {/* Nút Đăng nhập */}
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-        >
-          Đăng nhập
-        </button>
-      </form>
+      </div>
     </div>
   );
 };

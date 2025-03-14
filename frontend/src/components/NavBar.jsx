@@ -10,8 +10,8 @@ const NavBar = ({ user, logout }) => {
       <div className="flex items-center gap-3">
         <img src="/logo.png" alt="Logo" className="w-[40px] h-[40px] rounded-full" />
         <div className="text-left">
-          <h1 className="text-lg font-semibold text-gray-800">Trang web</h1>
-          <span className="text-sm text-gray-500">tìm việc làm</span>
+          <h1 className="text-lg font-semibold text-gray-800">ITJOBSearch</h1>
+          <span className="text-sm text-gray-500">Trang web tìm việc làm</span>
         </div>
       </div>
 
