@@ -149,7 +149,7 @@ const Register = () => {
         </div>
         {/* Phần Ảnh */}
         <div className="flex-1 flex items-center justify-center">
-          <img src="../public/register.png" alt="Đăng ký" className="max-w-full max-h-full object-contain rounded-3xl border" />
+          <img src="./register.png" alt="Đăng ký" className="max-w-full max-h-full object-contain rounded-3xl border" />
         </div>
       </div>
     </div>

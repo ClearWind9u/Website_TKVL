@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 const Login = ({ login }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("jobseeker");
+  const [role, setRole] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -42,13 +42,18 @@ const Login = ({ login }) => {
       return;
     }
 
+    if (role === "") {
+      setError("Vui lòng chọn vai trò của bạn!");
+      return;
+    }
+
     // Kiểm tra xác thực tài khoản theo vai trò đã chọn
     const user = fakeUsers[role];
     if (user && email === user.email && password === user.password) {
       login(user);
-      navigate(role === "jobseeker" ? "/jobseeker" : "/employer");
+      navigate(role === "jobseeker" ? "/jobseeker" : "/recruiter");
     } else {
-      setError("Email hoặc mật khẩu không đúng!");
+      setError("Email, mật khẩu hoặc vai trò không đúng!");
     }
   };
 
@@ -64,17 +69,6 @@ const Login = ({ login }) => {
           {error && <p className="text-red-500 mb-2">{error}</p>}
 
           <form onSubmit={handleLogin} className="space-y-4">
-            {/* Chọn Role */}
-            <select
-              className="w-full p-2 border rounded bg-white"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-            >
-              <option value="jobseeker">Người tìm việc</option>
-              <option value="recruiter">Nhà tuyển dụng</option>
-              <option value="admin">Quản trị viên</option>
-            </select>
-
             {/* Email */}
             <input
               type="email"
@@ -96,6 +90,17 @@ const Login = ({ login }) => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
+            {/* Chọn Role */}
+            <select
+              className="w-full p-2 border rounded bg-white"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <option value="">Chọn vai trò</option>
+              <option value="jobseeker">Người tìm việc</option>
+              <option value="recruiter">Nhà tuyển dụng</option>
+              <option value="admin">Quản trị viên</option>
+            </select>
 
             {/* Nút Đăng nhập */}
             <button type="submit" className="w-full bg-black text-white py-2 rounded">
@@ -106,7 +111,7 @@ const Login = ({ login }) => {
 
         {/* Phần Ảnh */}
         <div className="flex-1">
-          <img src="../public/login.jpg" alt="Đăng nhập" className="w-full h-full object-cover rounded-3xl border" />
+          <img src="./login.jpg" alt="Đăng nhập" className="w-full h-full object-cover rounded-3xl border" />
         </div>
       </div>
     </div>
