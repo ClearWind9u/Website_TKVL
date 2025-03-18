@@ -8,7 +8,7 @@ const Register = () => {
     birthday: "",
     address: "",
     city: "",
-    role: "",
+    role: "jobseeker",
     password: "",
     confirmPassword: "",
     agree: false,
@@ -124,12 +124,6 @@ const Register = () => {
             </div>
             <input type="password" name="password" placeholder="Mật khẩu" className="w-full p-2 border rounded" onChange={handleChange} />
             <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu" className="w-full p-2 border rounded" onChange={handleChange} />
-            <select name="role" className="w-full p-2 border rounded" onChange={handleChange}>
-              <option value="">Chọn vai trò</option>
-              <option value="jobseeker">Người tìm việc</option>
-              <option value="recruiter">Nhà tuyển dụng</option>
-              <option value="admin">Quản trị viên</option>
-            </select>
             <div className="flex items-center gap-2">
               <input type="checkbox" name="agree" onChange={handleChange} />
               <label className="text-sm text-gray-600">
