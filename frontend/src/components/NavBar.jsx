@@ -148,7 +148,6 @@ const NavBar = ({ user, logout }) => {
           <>
             <Link to="/login" className="px-4 py-2 text-gray-700 hover:text-black">Đăng nhập</Link>
             <Link to="/register" className="px-4 py-2 bg-black text-white rounded-md">Đăng ký</Link>
-            <Link to="/employer" className="px-4 py-2 border border-gray-400 rounded-md hover:bg-gray-100">Nhà tuyển dụng</Link>
           </>
         )}
       </div>
