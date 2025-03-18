@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"; // ✅ Import axios
+import hideEye from "../assets/hideEye.svg";
+import Eye from "../assets/eye.svg";
 
 const Login = ({ login }) => {
   const [email, setEmail] = useState("");
@@ -8,11 +10,15 @@ const Login = ({ login }) => {
   const [role, setRole] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
+  const handleShowPassword = () => {
+    setShowPassword(!showPassword);
+  }
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || !password) {
       setError("Vui lòng nhập email và mật khẩu!");
       return;
@@ -24,7 +30,7 @@ const Login = ({ login }) => {
     }
     if (!emailRegex.test(email)) {
       setError("Email không hợp lệ.");
-      return 
+      return
     }
 
     try {
@@ -54,7 +60,7 @@ const Login = ({ login }) => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg flex w-[900px] h-[400px]">
+      <div className="bg-white p-8 rounded-3xl shadow-lg flex w-[900px] h-[500px]">
         <div className="flex-1 pr-8">
           <h1 className="text-5xl font-bold text-white mb-2" style={{ WebkitTextStroke: "0.25px black" }}>Tìm việc</h1>
           <p className="text-xl mb-6">đi bé ơi, không là bốc hơi</p>
@@ -72,15 +78,19 @@ const Login = ({ login }) => {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
-            <input
-              type="password"
-              name="password"
-              placeholder="Mật khẩu"
-              className="w-full p-2 border rounded"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                placeholder="Mật khẩu"
+                className="w-full p-2 border rounded"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <img className="absolute top-[30%] right-[10px]  }" src={showPassword? Eye : hideEye} onClick={handleShowPassword} alt="" />
+              
+            </div>
             <select
               className="w-full p-2 border rounded bg-white"
               value={role}
@@ -97,8 +107,8 @@ const Login = ({ login }) => {
         <div className="flex-1">
           <img src="./login.jpg" alt="Đăng nhập" className="w-full h-full object-cover rounded-3xl border" />
         </div>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 
