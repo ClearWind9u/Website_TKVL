@@ -36,7 +36,7 @@ const Login = ({ login }) => {
   const handleLogin = (e) => {
     e.preventDefault();
     setError("");
-
+    let emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
     if (!email || !password) {
       setError("Vui lòng nhập email và mật khẩu!");
       return;
@@ -45,6 +45,10 @@ const Login = ({ login }) => {
     if (role === "") {
       setError("Vui lòng chọn vai trò của bạn!");
       return;
+    }
+    if (!emailRegex.test(email)) {
+      setError("Email không hợp lệ.");
+      return 
     }
 
     // Kiểm tra xác thực tài khoản theo vai trò đã chọn
@@ -58,10 +62,10 @@ const Login = ({ login }) => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg flex w-[900px]">
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="relative bg-white p-8 rounded-lg shadow-lg w-[900px] h-[500px]">
         {/* Phần Form */}
-        <div className="flex-1 pr-8">
+        <div className="pr-8 float-left w-1/2">
           <h1 className="text-5xl font-bold text-white mb-2" style={{ WebkitTextStroke: "0.25px black" }}>Tìm việc</h1>
           <p className="text-xl mb-6">đi bé ơi, không là bốc cớt ăn đó</p>
           <h2 className="text-xl font-semibold mb-4">Đăng nhập</h2>
@@ -71,7 +75,7 @@ const Login = ({ login }) => {
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Email */}
             <input
-              type="email"
+              type="text"
               name="email"
               placeholder="Email (xxxxx@gmail.com)"
               className="w-full p-2 border rounded"
@@ -110,7 +114,7 @@ const Login = ({ login }) => {
         </div>
 
         {/* Phần Ảnh */}
-        <div className="flex-1">
+        <div className="absolute top-0 right-0 w-1/2 h-full">
           <img src="./login.jpg" alt="Đăng nhập" className="w-full h-full object-cover rounded-3xl border" />
         </div>
       </div>
