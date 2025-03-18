@@ -35,7 +35,7 @@ const Footer = () => {
               },
               {
                 title: "Contact Info",
-                items: ["itjobsearch@hcmut.edu.vn"], // Đã thay đổi
+                items: ["itjobsearch@hcmut.edu.vn"],
               },
             ].map((section, index) => (
               <div key={index}>
