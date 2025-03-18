@@ -3,14 +3,14 @@ const User = require('../../models/User');
 const bycrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const registerUser = async (req, res) => {
-    const { userName, userEmail, password, role } = req.body;
+    const { userName, userEmail, password, role, dayofBirth, address } = req.body;
     const existingUser = await User.findOne({ $or: [{ userName }, { userEmail }] });
     if(existingUser) {
         return res.status(400).json({ message: 'User already exists' });
     }
     const hashedPassword = await bycrypt.hash(password, 12);
     try {   
-        const user = new User({ userName,userEmail,role,password:hashedPassword });
+        const user = new User({ userName,userEmail,role,password:hashedPassword , dayofBirth, address});
         await user.save();
         return res.status(201).json({
             success: true,
@@ -22,13 +22,19 @@ const registerUser = async (req, res) => {
 };
 const loginUser = async (req,res) => {
     console.log("JWT TOKEN: ", process.env.JWT_SECRET)
-    const {userEmail, password} = req.body;
+    const {userEmail, password, role} = req.body;
     const existingUser = await User.findOne({userEmail})
     if(!existingUser || !(bycrypt.compare(password,existingUser.password)))
     {
         return res.status(401).json({
             success: false,
             message: 'Invalid credentials',
+        });
+    }
+    if (existingUser.role !== role) {
+        return res.status(403).json({
+            success: false,
+            message: 'Invalid role',
         });
     }
     const accessToken = jwt.sign({

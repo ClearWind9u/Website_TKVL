@@ -7,6 +7,9 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 const authRouter = require('./routes/auth-routes');
+const adminRouter = require('./routes/admin');
+const jobseekerRouter = require('./routes/jobseeker')
+const recruiterRouter = require('./routes/recruiter')
 
 // Cấu hình CORS
 app.use(
@@ -29,7 +32,9 @@ app.use((err, req, res, next) => {
 
 // Routes xử lý request
 app.use('/auth', authRouter);
-
+app.use('/admin', adminRouter);
+app.use('/jobseeker', jobseekerRouter);
+app.use('/recruiter', recruiterRouter);
 // Khởi động server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
