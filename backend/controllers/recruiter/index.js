@@ -2,16 +2,6 @@ const User = require('../../models/User');
 const Post = require('../../models/Post');
 const JobApplication = require('../../models/JobApplication');
 
-const deleteAccount = async (req, res) => {
-    try {
-        const recruiterId = req.user._id;
-        await User.findByIdAndDelete(recruiterId);
-        res.status(200).json({ success: true, message: "Account deleted successfully" });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-};
-
 const viewUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -26,7 +16,8 @@ const viewUser = async (req, res) => {
 
 const viewAllPosts = async (req, res) => {
     try {
-        const posts = await Post.find({}); 
+        const recruiterId = req.user._id;
+        const posts = await Post.find({user_id: recruiterId}); 
         res.status(200).json({ success: true, data: posts });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -35,8 +26,9 @@ const viewAllPosts = async (req, res) => {
 
 const viewPostsByCategory = async (req, res) => {
     try {
+        const recruiterId = req.user._id;
         const categories = req.params.categories.split(','); 
-        const posts = await Post.find({ category: { $in: categories } });
+        const posts = await Post.find({ category: { $in: categories } , user_id: recruiterId});
         res.status(200).json({ success: true, data: posts });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
@@ -158,4 +150,4 @@ const editProfile = async (req, res) => {
     }
 };
 
-module.exports = { deleteAccount, viewUser, viewAllPosts, viewPostsByCategory, createPost, viewAllCV, viewCV , deletePost, editPost, editProfile};
+module.exports = { viewUser, viewAllPosts, viewPostsByCategory, createPost, viewAllCV, viewCV , deletePost, editPost, editProfile};
