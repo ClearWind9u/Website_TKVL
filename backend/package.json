@@ -1,32 +1,29 @@
 {
-  "name": "back_end",
+  "name": "server",
   "version": "1.0.0",
-  "description": "",
-  "type": "module",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "nodemon ./ASSIGNMENT/index.js"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js",
+    "start": "server.js"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "commonjs",
+  "description": "",
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  },
   "dependencies": {
     "bcryptjs": "^3.0.2",
-    "body-parser": "^1.20.3",
-    "cookie-parser": "^1.4.7",
-    "cookie-session": "^2.1.0",
+    "cloudinary": "^2.6.0",
     "cors": "^2.8.5",
-    "cross-env": "^7.0.3",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "express-session": "^1.18.1",
-    "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.10.0",
-    "mongoose": "^8.8.0",
+    "mongoose": "^8.12.1",
     "multer": "^1.4.5-lts.1",
-    "nodemon": "^3.1.7",
-    "passport": "^0.7.0",
-    "passport-google-oauth2": "^0.2.0",
-    "react-router-dom": "^7.0.2"
+    "paypal-rest-sdk": "^1.8.1"
   }
 }
