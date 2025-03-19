@@ -2,7 +2,7 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
-const UserContext = createContext();
+export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState(null);
@@ -13,19 +13,22 @@ export const UserProvider = ({ children }) => {
     const parts = value.split(`; ${name}=`);
     if (parts.length === 2) return parts.pop().split(';').shift();
   };
-
-  useEffect(() => {
-    const token = getCookie('token');
-    if (token) {
-      try {
-        const user = jwtDecode(token);
-        setUserInfo(user);
-        setIsLoggedIn(true);
-      } catch (error) {
-        console.error("Error decoding token:", error);
-      }
-    }
-  }, []);
+  const getToken = localStorage.getItem("TOKEN") 
+    ? localStorage.getItem("TOKENs") 
+    : null;
+  const [token, setToken] = useState(getToken);
+  // useEffect(() => {
+  //   const token = getCookie('token');
+  //   if (token) {
+  //     try {
+  //       const user = jwtDecode(token);
+  //       setUserInfo(user);
+  //       setIsLoggedIn(true);
+  //     } catch (error) {
+  //       console.error("Error decoding token:", error);
+  //     }
+  //   }
+  // }, []);
 
   const login = (user) => {
     setUserInfo(user);
@@ -49,7 +52,7 @@ export const UserProvider = ({ children }) => {
   
 
   return (
-    <UserContext.Provider value={{ userInfo, isLoggedIn, login, logout }}>
+    <UserContext.Provider value={{ userInfo, isLoggedIn, login, logout, token, setToken }}>
       {children}
     </UserContext.Provider>
   );

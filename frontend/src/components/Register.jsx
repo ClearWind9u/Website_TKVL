@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -27,7 +28,6 @@ const Register = () => {
     e.preventDefault();
     setError("");
     setSuccess("");
-
     if (Object.values(formData).some((value) => value === "")) {
       console.log(formData);
       setError("Vui lòng điền đầy đủ thông tin!");
@@ -36,6 +36,11 @@ const Register = () => {
 
     if (formData.password !== formData.confirmPassword) {
       setError("Mật khẩu xác nhận không khớp!");
+      return;
+    }
+
+    if (!formData.agree) {
+      setError("Bạn phải đồng ý với điều khoản dịch vụ trước khi đăng ký!");
       return;
     }
 
@@ -48,8 +53,15 @@ const Register = () => {
       });
 
       if (response.data.success) {
-        setSuccess("Đăng ký thành công! Vui lòng đăng nhập");
-        setTimeout(() => navigate("/login"), 2000);
+        // setSuccess("Đăng ký thành công! Vui lòng đăng nhập");
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Đăng ký thành công! Vui lòng đăng nhập",
+          showConfirmButton: false,
+          timer: 1500
+        });
+        navigate("/login");
       }
     } catch (err) {
       setError(err.response?.data?.message || "Đã xảy ra lỗi!");
@@ -72,7 +84,7 @@ const Register = () => {
             <input type="text" name="birthday" placeholder="Ngày tháng năm sinh (DD/MM/YYYY)" className="w-full p-2 border rounded" onChange={handleChange} />
             <div className="flex gap-2">
               <input type="text" name="address" placeholder="Địa chỉ" className="flex-1 p-2 border rounded" onChange={handleChange} />
-              
+
             </div>
             <input type="password" name="password" placeholder="Mật khẩu" className="w-full p-2 border rounded" onChange={handleChange} />
             <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu" className="w-full p-2 border rounded" onChange={handleChange} />

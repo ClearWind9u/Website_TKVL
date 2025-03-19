@@ -147,29 +147,30 @@ const JobHome = () => {
 
   const [hoverLeft, setHoverLeft] = useState(false);
   const [hoverRight, setHoverRight] = useState(false);
-  // useEffect(() => {
-  //   const fetchJobs = async () => {
-  //     try {
-  //       if (!userInfo) {
-  //         setError('Vui lòng đăng nhập để xem công việc.');
-  //         setLoading(false);
-  //         return;
-  //       }
-  //       const response = await axios.get(
-  //         userInfo.role === 'Jobseeker' ? 'http://localhost:8080/jobseeker' : 'http://localhost:8080/recruiter', 
-  //         { withCredentials: true }
-  //       );
-  //       setfetch("đã thực hiện lấy data");
-  //       setJobs(response.data); 
-  //     } catch (error) {
-  //       setError(error.message);  // Lưu lỗi nếu có
-  //     } finally {
-  //       setLoading(false);  // Kết thúc trạng thái loading
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchJobs = async () => {
+      try {
+        if (!userInfo) {
+          setError('Vui lòng đăng nhập để xem công việc.');
+          setLoading(false);
+          return;
+        }
+        const response = await axios.get(
+          userInfo.role === 'Jobseeker' ? 'http://localhost:8080/jobseeker/viewAllPosts' : 'http://localhost:8080/recruiter/viewAllPosts', 
+          { withCredentials: true }
+        );
+        setfetch("đã thực hiện lấy data");
+        setJobs(response.data); 
+      } catch (error) {
 
-  //   fetchJobs();  // Gọi hàm lấy dữ liệu
-  // }, []); 
+        setError(error.message);  // Lưu lỗi nếu có
+      } finally {
+        setLoading(false);  // Kết thúc trạng thái loading
+      }
+    };
+
+    fetchJobs();  // Gọi hàm lấy dữ liệu
+  }, []); 
   // const getDetailArticle = async () {
   //   const detaiArticle = await axios.get('http://localhost:8080/jobseeker/:id)
   // }

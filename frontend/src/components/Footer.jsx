@@ -3,7 +3,7 @@ import { FaLinkedin, FaFacebook, FaTiktok } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-800 text-white mt-auto">
+    <footer className="absolute bottom-0 right-0 w-full bg-gray-800 text-white">
       <div className="footer p-10 rounded-lg">
         <div className="flex flex-wrap justify-between items-start w-[90%] mx-auto gap-10">
           {/* Logo và Giới thiệu */}

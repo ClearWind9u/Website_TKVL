@@ -1,16 +1,20 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios"; // ✅ Import axios
 import hideEye from "../assets/hideEye.svg";
 import Eye from "../assets/eye.svg";
+import NavBar from "./NavBar";
+import { UserContext } from "../userContext/userContext";
 
-const Login = ({ login }) => {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  // const [token, setToken] = useContext(UserContext);
+  const { token,setToken } = useContext(UserContext);
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -39,19 +43,42 @@ const Login = ({ login }) => {
         password: password,
         role: role,
       });
-
+      // console.log(response.data);
       if (response.data.success) {
         const { accessToken, user } = response.data.data;
 
         // Lưu token vào localStorage
-        localStorage.setItem("token", accessToken);
-        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("TOKEN", accessToken);
+        localStorage.setItem("ROLE", user.role);
+        localStorage.setItem("USER", JSON.stringify(user));
+        setToken(accessToken);
+        // console.log(user.role.includes('admin'))
 
         // Gọi hàm `login` để cập nhật trạng thái người dùng
-        login(user);
+        // login(user);
 
         // Điều hướng theo vai trò
-        navigate(user.role === "jobseeker" ? "/jobseeker" : "/recruiter");
+        // navigate((user.role === "jobseeker" ? "/jobseeker" : "/recruiter")+ "/homepage");
+        // navigate("/{user.role}/homepage");
+        const rolene = JSON.parse(localStorage.getItem("USER"))
+        // console.log(rolene);
+        if (rolene.role.includes('admin')) {
+          localStorage.setItem("ROLE", 'admin')
+          navigate('/admin')
+        } else if (rolene.role.includes('recruiter')) {
+          localStorage.setItem("ROLE", 'recruiter')
+          // console.log("anc")
+          navigate('/recruiter')
+        } else if (rolene.role.includes('jobseeker')) {
+          localStorage.setItem("ROLE", 'jobseeker')
+          navigate('/jobseeker')
+        } else {
+          toast.error("Đã xảy ra lỗi! Vui lòng thử lại sau.", {
+            duration: 3000,
+            position: "top-right",
+          });
+        }
+        // navigate("/");
       }
     } catch (err) {
       setError(err.response?.data?.message || "Đăng nhập thất bại!");
@@ -59,6 +86,7 @@ const Login = ({ login }) => {
   };
 
   return (
+    <>
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-8 rounded-3xl shadow-lg flex w-[900px] h-[500px]">
         <div className="flex-1 pr-8">
@@ -109,6 +137,8 @@ const Login = ({ login }) => {
         </div>
       </div >
     </div >
+    
+    </>
   );
 };
 

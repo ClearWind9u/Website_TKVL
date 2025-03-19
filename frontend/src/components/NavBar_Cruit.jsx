@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AiOutlineBell} from 'react-icons/ai';
 import { FaUserCircle } from 'react-icons/fa';
 import { MdLogout } from "react-icons/md";
-import { Link } from 'react-router-dom';  // Import Link để điều hướng giữa các trang
+import { Link, useNavigate } from 'react-router-dom';  // Import Link để điều hướng giữa các trang
 
 const NavBar = ({ role, setRole }) => {
+  const navigate = useNavigate();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false); // Quản lý việc hiển thị box thông tin người dùng
 
   const [isLoggedIn, setIsLoggedIn] = useState(true); // Quản lý trạng thái đăng nhập, mặc định là chưa đăng nhập
@@ -27,6 +28,15 @@ const NavBar = ({ role, setRole }) => {
     alert("Bạn đã đăng xuất!");
     setIsLoggedIn(false); // Cập nhật trạng thái đăng xuất
     setIsDropdownVisible(false); // Ẩn dropdown khi đăng xuất
+    
+    localStorage.removeItem('TOKEN')
+    // localStorage.setItem('ROLE', 'user')
+    localStorage.removeItem('USER')
+    // localStorage.removeItem('CSRF_TOKEN')
+    localStorage.removeItem('ROLE')
+    navigate('/login'); // Điều hướng về trang login
+
+    // console.log("Đăng xuất thành công!");
   };
 
   // State để kiểm tra xem danh sách thông báo có mở hay không
