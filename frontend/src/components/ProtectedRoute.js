@@ -9,8 +9,6 @@ const ProtectedRoute = (props) => {
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('USER'))
-        console.log(user.role.includes(props.name))
-        console.log(token);
         if (!token || !user.role.includes(props.name)) {
             console.log("fall");
             navigate("/login", { replace: true });

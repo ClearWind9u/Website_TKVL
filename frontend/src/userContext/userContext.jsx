@@ -1,58 +1,49 @@
-// src/contexts/UserContext.js
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useMemo } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [userInfo, setUserInfo] = useState(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const storedToken = localStorage.getItem("TOKEN");
+  const [token, setToken] = useState(storedToken);
+  const [userInfo, setUserInfo] = useState(() => {
+    try {
+      return storedToken ? jwtDecode(storedToken) : null;
+    } catch {
+      return null;
+    }
+  });
+  const [isLoggedIn, setIsLoggedIn] = useState(!!storedToken);
 
-  const getCookie = (name) => {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-  };
-  const getToken = localStorage.getItem("TOKEN") 
-    ? localStorage.getItem("TOKENs") 
-    : null;
-  const [token, setToken] = useState(getToken);
-  // useEffect(() => {
-  //   const token = getCookie('token');
-  //   if (token) {
-  //     try {
-  //       const user = jwtDecode(token);
-  //       setUserInfo(user);
-  //       setIsLoggedIn(true);
-  //     } catch (error) {
-  //       console.error("Error decoding token:", error);
-  //     }
-  //   }
-  // }, []);
-
-  const login = (user) => {
+  const login = (user, token) => {
     setUserInfo(user);
     setIsLoggedIn(true);
+    setToken(token);
+    localStorage.setItem("TOKEN", token);
+    localStorage.setItem("USER", JSON.stringify(user));
   };
 
-  const clearAllCookies = () => {
-    const cookies = document.cookie.split(";");
-  
-    cookies.forEach(cookie => {
-      const cookieName = cookie.split("=")[0].trim();
-      document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-    });
-  };
-  
   const logout = () => {
     setUserInfo(null);
     setIsLoggedIn(false);
-    clearAllCookies(); // Xóa tất cả cookies
+    setToken(null);
+    localStorage.removeItem("TOKEN");
+    localStorage.removeItem("USER");
+    document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
   };
-  
+
+  // Dùng useMemo để tránh re-render không cần thiết
+  const providerValue = useMemo(() => ({
+    userInfo,
+    isLoggedIn,
+    login,
+    logout,
+    token,
+    setToken,
+  }), [userInfo, isLoggedIn, token]);
 
   return (
-    <UserContext.Provider value={{ userInfo, isLoggedIn, login, logout, token, setToken }}>
+    <UserContext.Provider value={providerValue}>
       {children}
     </UserContext.Provider>
   );

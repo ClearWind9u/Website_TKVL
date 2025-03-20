@@ -29,7 +29,6 @@ const Register = () => {
     setError("");
     setSuccess("");
     if (Object.values(formData).some((value) => value === "")) {
-      console.log(formData);
       setError("Vui lòng điền đầy đủ thông tin!");
       return;
     }
@@ -75,7 +74,7 @@ const Register = () => {
         <div className="flex-1 pr-8">
           <h1 className="text-5xl font-bold text-white mb-2" style={{ WebkitTextStroke: "0.25px black" }}>Tìm việc
           </h1>
-          <p className="text-xl mb-6">đi bé ơi, không là bốc hơi</p>
+          <p className="text-xl mb-6">đi bé ơi, sắp ra trường tới nơi</p>
           <h2 className="text-xl font-semibold mb-4">Đăng ký tài khoản</h2>
           {error && <p className="text-red-500 mb-2">{error}</p>}
           <form onSubmit={handleSubmit} className="space-y-4">

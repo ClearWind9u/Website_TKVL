@@ -2,20 +2,23 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import UserContext from "../userContext/userContext";
 import { useNavigate } from "react-router-dom";
-var profileLocal ={
+var profileLocal = {
   Name: "Tran Thanh Phong",
   email: "abc@GiMailShirt.com",
   CCCD: 123123123,
   location: "HCM city",
-  CVProfile:{
-    name: "Phong",
-    _id: 2212571,
-    cvFile:{
-      contentType: "pdf",
-      name: 'abc'
-    } 
-  }
-}
+  CVProfile: [
+    {
+      name: "Phong",
+      _id: 2212571,
+      cvFile: {
+        contentType: "pdf",
+        name: "abc",
+      },
+    },
+  ],
+};
+
 const Profile = () => {
   const [profile, setProfile] = useState(profileLocal);
   const [error, setError] = useState("");
@@ -23,20 +26,20 @@ const Profile = () => {
   const [uploadError, setUploadError] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState("");
   const navigate = useNavigate();
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     try {
-  //       const response = await axios.get("http://localhost:8080/jobseeker/info", {
-  //         withCredentials: true,
-  //       });
-  //       setProfile(response.data.user);
-  //     } catch (error) {
-  //       setError(error.message);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/jobseeker/info", {
+          withCredentials: true,
+        });
+        setProfile(response.data.user);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
 
-  //   fetchProfile();
-  // }, []);
+    fetchProfile();
+  }, []);
 
 
   const handleFileChange = (event) => {
@@ -57,7 +60,7 @@ const Profile = () => {
       setUploadError("");
       setUploadSuccess("");
       const response = await axios.post(
-        "http://localhost:8080/jobseeker/info/uploadCV",
+        "http://localhost:5000/jobseeker/info/uploadCV",
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
@@ -79,7 +82,7 @@ const Profile = () => {
   const handleDeleteCV = async (cvId) => {
     try {
       const response = await axios.delete(
-        `http://localhost:8080/jobseeker/info/deleteCV/${cvId}`,
+        `http://localhost:5000/jobseeker/info/deleteCV/${cvId}`,
         { withCredentials: true }
       );
       // Cập nhật lại profile sau khi xóa

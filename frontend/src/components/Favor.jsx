@@ -1,14 +1,12 @@
 import React from 'react'
-import Search from './Search'
 import JobHome from './JobHome'
 
-const Home = () => {
+const Favor = () => {
   return (
     <div>
-      <Search/>
       <JobHome/>
     </div>
   )
 }
 
-export default Home
+export default Favor
