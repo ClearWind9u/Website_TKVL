@@ -25,7 +25,7 @@ const viewUser = async (req, res) => {
 const viewAllPosts = async (req, res) => {
     try {
         const posts = await Post.find({});
-        res.status(200).json({success: true,data: posts});
+        res.status(200).json({success: true, data: posts});
     } catch (error) {
         res.status(500).json({success: false, message: error.message });
     }
@@ -37,7 +37,7 @@ const viewPostsByCategory = async (req, res) => {
         
         const posts = await Post.find({ category: { $in: categories } }); // Tìm bài đăng chứa ít nhất 1 category
 
-        if (posts.length === 0) return res.status(404).json({success: false, message: "No posts found in these categories" });
+        //if (posts.length === 0) return res.status(404).json({success: false, message: "No posts found in these categories" });
 
         res.status(200).json({success: true, data: posts});
     } catch (error) {

@@ -1,18 +1,16 @@
 require('dotenv').config();
 const User = require('../../models/User');
-const bcrypt = require('bcryptjs');
+const bycrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { registerValidator } = require('../../validations/auth');
-
 const registerUser = async (req, res) => {
     const { userName, userEmail, password, role, dayofBirth, address } = req.body;
     const existingUser = await User.findOne({ $or: [{ userName }, { userEmail }] });
-    if(existingUser) {
+    if (existingUser) {
         return res.status(400).json({ message: 'User already exists' });
     }
     const hashedPassword = await bycrypt.hash(password, 12);
-    try {   
-        const user = new User({ userName,userEmail,role,password:hashedPassword , dayofBirth, address});
+    try {
+        const user = new User({ userName, userEmail, role, password: hashedPassword, dayofBirth, address });
         await user.save();
         return res.status(201).json({
             success: true,
@@ -22,15 +20,14 @@ const registerUser = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-const loginUser = async (req,res) => {
-    console.log("JWT TOKEN: ", process.env.JWT_SECRET)
-    const {userEmail, password, role} = req.body;
-    const existingUser = await User.findOne({userEmail})
-    if(!existingUser || !(bycrypt.compare(password,existingUser.password)))
-    {
+const loginUser = async (req, res) => {
+    //console.log("JWT TOKEN: ", process.env.JWT_SECRET)
+    const { userEmail, password, role } = req.body;
+    const existingUser = await User.findOne({ userEmail })
+    if (!existingUser || !(await bycrypt.compare(password, existingUser.password))) {
         return res.status(401).json({
             success: false,
-            message: "Lỗi server!",
+            message: 'Invalid credentials',
         });
     }
     if (existingUser.role !== role) {
@@ -44,6 +41,22 @@ const loginUser = async (req,res) => {
         userName: existingUser.userName,
         userEmail: existingUser.userEmail,
         role: existingUser.role
-    }, process.env.JWT_SECRET, {expiresIn: '360m'})
+    }, process.env.JWT_SECRET, { expiresIn: '360m' })
+    const decodedToken = jwt.decode(accessToken);
+
+    res.status(200).json({
+        success: true,
+        message: 'Logged in successfully',
+        data: {
+            accessToken,
+            user: {
+                _id: existingUser._id,
+                userName: existingUser.userName,
+                userEmail: existingUser.userEmail,
+                role: existingUser.role
+            }
+        }
+    })
+}
 
 module.exports = { registerUser, loginUser };
