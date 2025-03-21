@@ -47,6 +47,8 @@ const Register = () => {
       const response = await axios.post("http://localhost:5000/auth/register", {
         userName: formData.name,
         userEmail: formData.email,
+        address: formData.address,
+        dayofBirth: formData.birthday,
         password: formData.password,
         role: "jobseeker",
       });
