@@ -51,6 +51,8 @@ const Register = () => {
         dayofBirth: formData.birthday,
         password: formData.password,
         role: "jobseeker",
+        dayofBirth: formData.birthday,
+        address: formData.address
       });
 
       if (response.data.success) {
