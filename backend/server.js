@@ -10,7 +10,6 @@ const authRouter = require('./routes/auth-routes');
 const adminRouter = require('./routes/admin');
 const jobseekerRouter = require('./routes/jobseeker')
 const recruiterRouter = require('./routes/recruiter')
-const articleRouter = require('./routes/articles')
 // Cấu hình CORS
 app.use(
     cors({
@@ -35,7 +34,6 @@ app.use('/auth', authRouter);
 app.use('/admin', adminRouter);
 app.use('/jobseeker', jobseekerRouter);
 app.use('/recruiter', recruiterRouter);
-app.use('/articles', articleRouter);
 // Khởi động server
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
