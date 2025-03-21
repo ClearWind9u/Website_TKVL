@@ -12,7 +12,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useContext(UserContext);
+  const { login,setUserInfo } = useContext(UserContext);
   //const { token,setToken } = useContext(UserContext);
 
   const handleShowPassword = () => {
@@ -49,8 +49,8 @@ const Login = () => {
         // localStorage.setItem("TOKEN", accessToken);
         // localStorage.setItem("ROLE", user.role);
         // localStorage.setItem("USER", JSON.stringify(user));
+        // setUserInfo(user);
         login(user, accessToken);
-
         const rolene = JSON.parse(localStorage.getItem("USER"))
         // console.log(rolene);
         if (rolene.role.includes('admin')) {

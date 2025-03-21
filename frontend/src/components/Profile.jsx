@@ -1,45 +1,46 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import UserContext from "../userContext/userContext";
 import { useNavigate } from "react-router-dom";
-var profileLocal = {
-  Name: "Tran Thanh Phong",
-  email: "abc@GiMailShirt.com",
-  CCCD: 123123123,
-  location: "HCM city",
-  CVProfile: [
-    {
-      name: "Phong",
-      _id: 2212571,
-      cvFile: {
-        contentType: "pdf",
-        name: "abc",
-      },
-    },
-  ],
-};
+// var profileLocal = {
+//   Name: "Tran Thanh Phong",
+//   email: "abc@GiMailShirt.com",
+//   CCCD: 123123123,
+//   location: "HCM city",
+//   CVProfile: [
+//     {
+//       name: "Phong",
+//       _id: 2212571,
+//       cvFile: {
+//         contentType: "pdf",
+//         name: "abc",
+//       },
+//     },
+//   ],
+// };
 
 const Profile = () => {
-  const [profile, setProfile] = useState(profileLocal);
+  const {userInfo} = useContext(UserContext);
+  // const [profile, setProfile] = useState(profileLocal);
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadError, setUploadError] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState("");
   const navigate = useNavigate();
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/jobseeker/info", {
-          withCredentials: true,
-        });
-        setProfile(response.data.user);
-      } catch (error) {
-        setError(error.message);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       const response = await axios.get("http://localhost:5000/jobseeker/info", {
+  //         withCredentials: true,
+  //       });
+  //       setProfile(response.data.user);
+  //     } catch (error) {
+  //       setError(error.message);
+  //     }
+  //   };
 
-    fetchProfile();
-  }, []);
+  //   fetchProfile();
+  // }, []);
 
 
   const handleFileChange = (event) => {
@@ -97,6 +98,7 @@ const Profile = () => {
       console.error(error);
     }
   };
+  console.log(userInfo);
 
   return (
     <div className="flex flex-col w-full items-center text-[#3C3C3C] border-[#00000000] gap-10 mb-3">
@@ -107,24 +109,24 @@ const Profile = () => {
       <div className="flex flex-col w-[600px] gap-4">
         <div className="flex flex-col">
           <label className="font-semibold text-[20px]">Họ và tên:</label>
-          <div className="p-4 border-2 rounded-md">{profile.Name || "Chưa cập nhật"}</div>
+          <div className="p-4 border-2 rounded-md">{userInfo.userName || "Chưa cập nhật"}</div>
         </div>
         <div className="flex flex-col">
           <label className="font-semibold text-[20px]">Email:</label>
-          <div className="p-4 border-2 rounded-md">{profile.email || "Chưa cập nhật"}</div>
+          <div className="p-4 border-2 rounded-md">{userInfo.userEmail || "Chưa cập nhật"}</div>
         </div>
         <div className="flex flex-col">
-          <label className="font-semibold text-[20px]">CCCD:</label>
-          <div className="p-4 border-2 rounded-md">{profile.CCCD || "Chưa cập nhật"}</div>
+          <label className="font-semibold text-[20px]">Vai trò:</label>
+          <div className="p-4 border-2 rounded-md">{userInfo.role || "Chưa cập nhật"}</div>
         </div>
         <div className="flex flex-col">
           <label className="font-semibold text-[20px]">Địa chỉ:</label>
-          <div className="p-4 border-2 rounded-md">{profile.location || "Chưa cập nhật"}</div>
+          <div className="p-4 border-2 rounded-md">{userInfo.address || "Chưa cập nhật"}</div>
         </div>
         <div className="flex flex-col">
           <label className="font-semibold text-[20px]">Ngày sinh:</label>
           <div className="p-4 border-2 rounded-md">
-            {profile.birthday ? new Date(profile.birthday).toLocaleDateString() : "Chưa cập nhật"}
+            {userInfo.BoD ? new Date(userInfo.BoD).toLocaleDateString() : "Chưa cập nhật"}
           </div>
         </div>
       </div>
@@ -132,8 +134,8 @@ const Profile = () => {
       {/* CV Profile */}
       <div className="flex flex-col w-[600px] gap-4">
         <h2 className="font-bold text-[20px]">Thông tin CV:</h2>
-        {profile.CVProfile && profile.CVProfile.length > 0 ? (
-          profile.CVProfile.map((cv, index) => (
+        {userInfo.CVProfile && userInfo.CVProfile.length > 0 ? (
+          userInfo.CVProfile.map((cv, index) => (
             <div key={index} className="flex flex-col gap-2 border p-4 rounded-md">
               {/* Hiển thị tên CV và id */}
               <p className="font-semibold">Tên CV: {cv?.name || "Chưa có tên CV"}</p>

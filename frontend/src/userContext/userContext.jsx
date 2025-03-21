@@ -6,16 +6,18 @@ export const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const storedToken = localStorage.getItem("TOKEN");
   const [token, setToken] = useState(storedToken);
-  const [userInfo, setUserInfo] = useState(() => {
-    try {
-      return storedToken ? jwtDecode(storedToken) : null;
-    } catch {
-      return null;
-    }
-  });
+  // const [userInfo, setUserInfo] = useState(() => {
+  //   try {
+  //     return storedToken ? jwtDecode(storedToken) : null;
+  //   } catch {
+  //     return null;
+  //   }
+  // });
+  const [userInfo, setUserInfo] = useState();
+  
   const [isLoggedIn, setIsLoggedIn] = useState(!!storedToken);
 
-  const login = (user, token) => {
+  const login = (user, token) => {;
     setUserInfo(user);
     setIsLoggedIn(true);
     setToken(token);
@@ -35,6 +37,7 @@ export const UserProvider = ({ children }) => {
   // Dùng useMemo để tránh re-render không cần thiết
   const providerValue = useMemo(() => ({
     userInfo,
+    setUserInfo,
     isLoggedIn,
     login,
     logout,
