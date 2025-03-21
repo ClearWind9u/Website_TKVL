@@ -43,6 +43,7 @@ const App = () => {
               <Route path="job" element={<Job />} />
               <Route path="status" element={<Status />} />
               <Route path="favor" element={<Favor />} />
+              <Route path="jobDetail/:id" element={<CompDetail />} />
             </Route>
             <Route path="/recruiter" element={
               <ProtectedRoute name="recruiter">
@@ -54,6 +55,7 @@ const App = () => {
               <Route path="profile" element={<Profile />} />
               <Route path="job" element={<Job />} />
               <Route path="create" element={<CreateJob />} />
+              <Route path="jobDetail/:id" element={<CompDetail />} />
             </Route>
             <Route path="/admin" element={
               <ProtectedRoute name="admin">
@@ -63,10 +65,8 @@ const App = () => {
               <Route index element={<Navigate to="/admin/homepage" replace />} />
               <Route path="homepage" element={<Home />} />
             </Route>
-            <Route path="/createjob" element={<CreateJob />} />
-            <Route path="/compdetail:id" element={<CompDetail />} />
+            <Route path="/jobDetail/:id" element={<CompDetail />} />
             <Route path="/candidate:id" element={<Candidate />} />
-            <Route path="/imgbg" element={<ImgBg />} />
             <Route path="*" element={<Login />} />
           </Routes>
         </div>

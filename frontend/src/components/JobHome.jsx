@@ -11,50 +11,73 @@ import { useLocation } from 'react-router-dom'; // Để lấy thông tin vị t
 import logo1 from '/company/vnglogo.png';
 import { UserContext } from '../userContext/userContext';
 
-const SingleJob = ({ id, title, content, salary, address, category }) => {
+const SingleJob = ({ id, title, salary, address, category, user_id }) => {
   const [isHoveredLove, setIsHoveredLove] = useState(false);
+  const [userName, setUserName] = useState("");
   const navigate = useNavigate();
+  const { userInfo, token } = useContext(UserContext);
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const response = await axios.get(userInfo.role === "jobseeker"
+          ? `http://localhost:5000/jobseeker/viewUser/${user_id}`
+          : `http://localhost:5000/recruiter/viewUser/${user_id}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        setUserName(response.data?.data.userName || "Không xác định");
+      } catch (error) {
+        console.error("Lỗi khi lấy userName:", error);
+        setUserName("Không xác định");
+      }
+    };
+
+    if (user_id) {
+      fetchUserName();
+    }
+  }, [user_id]);
+
   const handleJobClick = () => {
-    navigate(`/jobDetail/${id}`);
+    if (userInfo.role === "jobseeker") {
+      navigate(`/jobseeker/jobDetail/${id}`);
+    } else {
+      navigate(`/recruiter/jobDetail/${id}`);
+    }
   };
 
   return (
     <div
-      className='singleJob w-[280px] h-auto p-[15px] bg-white rounded-[20px] border border-black cursor-pointer shadow-[4px_4px_6px_rgba(0,_0,_0,_0.3)]'
+      className="singleJob w-[280px] h-auto p-[15px] bg-white rounded-[20px] border border-black cursor-pointer shadow-[4px_4px_6px_rgba(0,_0,_0,_0.3)]"
       onClick={handleJobClick}
     >
-      <div className='com_top flex justify-between items-center mb-2'>
-        <h2 className='text-lg font-bold'>{title}</h2>
-        <span className='text-xl'
+      <div className="com_top flex justify-between items-center mb-2">
+        <h2 className="text-lg font-bold">{title}</h2>
+        <span
+          className="text-xl"
           onMouseEnter={() => setIsHoveredLove(true)}
           onMouseLeave={() => setIsHoveredLove(false)}
         >
           {isHoveredLove ? <IoHeartCircle /> : <IoHeartCircleOutline />}
         </span>
       </div>
-      <p className='text-sm mb-2'>{content}</p>
-      <div className='com_bot flex items-center'>
-        <div className='w-[60px] h-[60px] mr-2'>
-          <img src={logo1} alt='Company Logo' className='w-full h-full object-contain' />
+
+      <div className="com_bot flex items-center">
+        <div className="w-[60px] h-[60px] mr-2">
+          <img src={logo1} alt="Company Logo" className="w-full h-full object-contain" />
         </div>
-        <div className='border-l-2 border-gray-500 h-[60px] mx-2'></div>
-        <div className='com_right ml-2'>
-          <div className="text-left">
-            <div className="text-sm font-medium mb-1 flex flex-wrap gap-2">
-              {category.map((cat, index) => (
-                <span key={index} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                  {cat}
-                </span>
-              ))}
-            </div>
+        <div className="border-l-2 border-gray-500 h-[60px] mx-2"></div>
+        <div className="com_right ml-2">
+          <div className='text-left'> 
+            <p className='text-sm font-medium mb-1 text-gray-500'>{userName}</p>
+          </div> 
+          <div className="flex items-center mb-1">
+            <span className="text-sm font-medium"><RiMoneyDollarCircleLine /></span>
+            <p className="text-sm ml-2">{salary}</p>
           </div>
-          <div className='flex items-center mb-1'>
-            <span className='text-sm font-medium'><RiMoneyDollarCircleLine /></span>
-            <p className='text-sm ml-2'>{salary}</p>
-          </div>
-          <div className='flex items-center'>
-            <span className='text-sm font-medium'><IoLocationOutline /></span>
-            <p className='text-sm ml-2'> {address} </p>
+          <div className="flex items-center">
+            <span className="text-sm font-medium"><IoLocationOutline /></span>
+            <p className="text-sm ml-2"> {address} </p>
           </div>
         </div>
       </div>
@@ -125,22 +148,22 @@ const JobHome = () => {
         setLoading(false);
         return;
       }
-  
+
       if (categories.length === 0) {
         fetchJobs(); // Nếu không có danh mục, gọi API lấy tất cả công việc
         return;
       }
-  
+
       setLoading(true);
       const endpoint =
         userInfo.role === "jobseeker"
           ? `http://localhost:5000/jobseeker/viewPostsByCategory/${categories.join(",")}`
           : `http://localhost:5000/recruiter/viewPostsByCategory/${categories.join(",")}`;
-  
+
       const response = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       setJobs(response.data?.data);
     } catch (error) {
       console.error("Lỗi Axios:", error);
@@ -148,42 +171,42 @@ const JobHome = () => {
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
-const fetchJobs = async () => {
+  const fetchJobs = async () => {
     try {
-        if (!isLoggedIn || !userInfo) {
-            setError({ message: "Vui lòng đăng nhập để xem công việc." });
-            setLoading(false);
-            return;
-        }
-
-        setLoading(true);
-        const response = await axios.get(
-            userInfo.role === "jobseeker"
-                ? "http://localhost:5000/jobseeker/viewAllPosts"
-                : "http://localhost:5000/recruiter/viewAllPosts",
-            {
-                headers: { Authorization: `Bearer ${token}` },
-            }
-        );
-        setJobs(response.data?.data);
-    } catch (error) {
-        console.error("Lỗi Axios:", error);
-        setError(error.response?.data?.message || "Đã xảy ra lỗi.");
-    } finally {
+      if (!isLoggedIn || !userInfo) {
+        setError({ message: "Vui lòng đăng nhập để xem công việc." });
         setLoading(false);
-    }
-};
+        return;
+      }
 
-// useEffect duy nhất để gọi API
-useEffect(() => {
-    if (!selectedOptions || selectedOptions.length === 0) {
-        fetchJobs();
-    } else {
-        fetchJobsByCategory(selectedOptions);
+      setLoading(true);
+      const response = await axios.get(
+        userInfo.role === "jobseeker"
+          ? "http://localhost:5000/jobseeker/viewAllPosts"
+          : "http://localhost:5000/recruiter/viewAllPosts",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setJobs(response.data?.data);
+    } catch (error) {
+      console.error("Lỗi Axios:", error);
+      setError(error.response?.data?.message || "Đã xảy ra lỗi.");
+    } finally {
+      setLoading(false);
     }
-}, [selectedOptions, isLoggedIn, userInfo, token]); 
+  };
+
+  // useEffect duy nhất để gọi API
+  useEffect(() => {
+    if (!selectedOptions || selectedOptions.length === 0) {
+      fetchJobs();
+    } else {
+      fetchJobsByCategory(selectedOptions);
+    }
+  }, [selectedOptions, isLoggedIn, userInfo, token]);
 
   return (
     <div className='w-[90%] m-auto'>
@@ -270,11 +293,12 @@ useEffect(() => {
           jobs.map((job) => (
             <SingleJob
               key={job._id}
-              id={job._id}
               title={job.title}
+              content={job.content}
               salary={job.salary}
               address={job.address}
               category={job.category}
+              user_id={job.user_id}
             />
           ))
         ) : (

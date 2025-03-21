@@ -28,7 +28,7 @@ const CompDetail = () => {
   const [isCVModalOpen, setIsCVModalOpen] = useState(false); // Trạng thái mở/đóng modal chọn CV
   const [cvList, setCVList] = useState([]); // Danh sách CV của người dùng
   const [selectedCVId, setSelectedCVId] = useState(null); // ID của CV được chọn
-  const { userInfo, isLoggedIn } = useContext(UserContext);
+  const { userInfo, token } = useContext(UserContext);
   const navigate = useNavigate();
   const handleReportClick = () => {
     setIsReportOpen(true); // Mở modal báo cáo
@@ -47,18 +47,18 @@ const CompDetail = () => {
   useEffect(() => {
     const fetchJobDetail = async () => {
       try {
-        const response1 = await axios.get(
-          `http://localhost:8080/jobseeker/${id}`,
+        const response1 = await axios.get(userInfo?.role === 'jobseeker' ?
+          `http://localhost:5000/jobseeker/${id}` : `http://localhost:5000/recruiter/${id}`,
         );
         setJobDetail(response1.data);
-        const response2 = await axios.get(userInfo?.role === 'Jobseeker' ? "http://localhost:8080/jobseeker" : "http://localhost:8080/recruiter", {
+        const response2 = await axios.get(userInfo?.role === 'jobseeker' ? "http://localhost:5000/jobseeker" : "http://localhost:5000/recruiter", {
           withCredentials: true,
         });
         const allJobs = response2.data;
         const randomJobs = allJobs.sort(() => Math.random() - 0.5).slice(0, 7);
 
         setJobRamdom(randomJobs);
-        const cvResponse = await axios.get(`http://localhost:8080/jobseeker/info/CV`, {
+        const cvResponse = await axios.get(`http://localhost:5000/jobseeker/info/CV`, {
           withCredentials: true,
         });
         setCVList(cvResponse.data.CVProfile.data);
@@ -81,7 +81,7 @@ const CompDetail = () => {
     }
     try {
       const response = await axios.post(
-        `http://localhost:8080/jobseeker/${id}/submitCV`,
+        `http://localhost:5000/jobseeker/${id}/submitCV`,
         {
           CVID: selectedCVId,
         },
@@ -114,7 +114,7 @@ const CompDetail = () => {
 
     if (confirmDelete) {
       try {
-        const response = await axios.delete(`http://localhost:8080/recruiter/${jobId}/delete`, {
+        const response = await axios.delete(`http://localhost:5000/recruiter/${jobId}/delete`, {
           withCredentials: true,
         });
 
