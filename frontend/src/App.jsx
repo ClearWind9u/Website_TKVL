@@ -53,6 +53,7 @@ const App = () => {
               <Route path="homepage" element={<Home />} />
               <Route path="profile" element={<Profile />} />
               <Route path="job" element={<Job />} />
+              <Route path="create" element={<CreateJob />} />
             </Route>
             <Route path="/admin" element={
               <ProtectedRoute name="admin">

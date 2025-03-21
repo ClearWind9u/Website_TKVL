@@ -71,12 +71,15 @@ const NavBar = () => {
                 </div>
               )}
             </div>
-            <div className="relative" onClick={handleAvatarClick}>
-              {userInfo.avatar ? (
-                <img src={userInfo.avatar} alt="Avatar" className="w-[35px] h-[35px] rounded-full border cursor-pointer" />
-              ) : (
-                <FaUserCircle className="w-[35px] h-[35px] text-gray-500 cursor-pointer" />
-              )}
+            <div className="flex items-center gap-2">
+              <div className="relative" onClick={handleAvatarClick}>
+                {userInfo.avatar ? (
+                  <img src={userInfo.avatar} alt="Avatar" className="w-[35px] h-[35px] rounded-full border cursor-pointer" />
+                ) : (
+                  <FaUserCircle className="w-[35px] h-[35px] text-gray-500 cursor-pointer" />
+                )}
+              </div>
+              <span className="text-sm text-gray-600">{userInfo.role === "recruiter" ? "Nhà tuyển dụng" : "Người tìm việc"}</span>
             </div>
             {isDropdownVisible && (
               <div className="absolute top-[50px] right-0 bg-white border-2 border-gray-300 rounded-lg w-[250px] shadow-md p-4 z-9999">

@@ -120,32 +120,35 @@ const JobHome = () => {
 
   const fetchJobsByCategory = async (categories) => {
     try {
-        if (!isLoggedIn || !userInfo) {
-            setError({ message: "Vui lòng đăng nhập để xem công việc." });
-            setLoading(false);
-            return;
-        }
-
-        if (categories.length === 0) {
-            fetchJobs(); // Nếu không có danh mục, gọi API lấy tất cả công việc
-            return;
-        }
-
-        setLoading(true);
-        const response = await axios.get(
-            `http://localhost:5000/jobseeker/viewPostsByCategory/${categories.join(",")}`,
-            {
-                headers: { Authorization: `Bearer ${token}` },
-            }
-        );
-        setJobs(response.data?.data);
-    } catch (error) {
-        console.error("Lỗi Axios:", error);
-        setError(error.response?.data?.message || "Đã xảy ra lỗi.");
-    } finally {
+      if (!isLoggedIn || !userInfo) {
+        setError({ message: "Vui lòng đăng nhập để xem công việc." });
         setLoading(false);
+        return;
+      }
+  
+      if (categories.length === 0) {
+        fetchJobs(); // Nếu không có danh mục, gọi API lấy tất cả công việc
+        return;
+      }
+  
+      setLoading(true);
+      const endpoint =
+        userInfo.role === "jobseeker"
+          ? `http://localhost:5000/jobseeker/viewPostsByCategory/${categories.join(",")}`
+          : `http://localhost:5000/recruiter/viewPostsByCategory/${categories.join(",")}`;
+  
+      const response = await axios.get(endpoint, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      setJobs(response.data?.data);
+    } catch (error) {
+      console.error("Lỗi Axios:", error);
+      setError(error.response?.data?.message || "Đã xảy ra lỗi.");
+    } finally {
+      setLoading(false);
     }
-};
+  };  
 
 const fetchJobs = async () => {
     try {
