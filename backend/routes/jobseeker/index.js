@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const router = express.Router();
 const { authenticateMiddleware } = require("../../middleware/auth-middleware");
-const { deleteAccount, viewUser, viewAllPosts, viewPostsByCategory, applyForJob , editProfile} = require("../../controllers/jobseeker");
+const { viewPostById, deleteAccount, viewUser, viewAllPosts, viewPostsByCategory, applyForJob , editProfile} = require("../../controllers/jobseeker");
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'uploads/cvs/'); 
@@ -28,5 +28,5 @@ router.get('/viewAllPosts', authenticateMiddleware, viewAllPosts);
 router.get('/viewPostsByCategory/:categories', authenticateMiddleware, viewPostsByCategory);
 router.post('/applyForJob', authenticateMiddleware,  upload.single('cv'),applyForJob);
 router.post('/editProfile', authenticateMiddleware, editProfile);
-
+router.get('/viewPost/:id',authenticateMiddleware, viewPostById);
 module.exports = router;

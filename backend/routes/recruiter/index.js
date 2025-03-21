@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateMiddleware, isRecruiter } = require("../../middleware/auth-middleware");
-const { deleteAccount, viewUser, viewAllPosts, viewPostsByCategory, createPost , viewAllCV, viewCV, deletePost , editPost, editProfile} 
+const { viewPostById,deleteAccount, viewUser, viewAllPosts, viewPostsByCategory, createPost , viewAllCV, viewCV, deletePost , editPost, editProfile} 
     = require("../../controllers/recruiter");
 router.post('/deleteAccount', authenticateMiddleware, isRecruiter ,deleteAccount);
 router.get('/viewUser/:id', authenticateMiddleware,isRecruiter , viewUser);
@@ -13,6 +13,6 @@ router.get('/viewCV:id',authenticateMiddleware, isRecruiter ,viewCV);
 router.post('/deletePost', authenticateMiddleware, isRecruiter ,deletePost);
 router.post('/editPost', authenticateMiddleware, isRecruiter ,editPost);
 router.post('/editProfile', authenticateMiddleware, isRecruiter ,editProfile);
-
+router.get('/viewPost/:id',authenticateMiddleware, viewPostById);
 
 module.exports = router;
