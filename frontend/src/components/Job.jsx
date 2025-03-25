@@ -113,6 +113,7 @@ const Job = () => {
               address={job.address}
               category={job.category}
               user_id={job.user_id}
+              companyName={job.companyName}
             />
           ))
         ) : (

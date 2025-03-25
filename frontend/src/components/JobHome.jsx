@@ -11,34 +11,35 @@ import { useLocation } from 'react-router-dom'; // Để lấy thông tin vị t
 import logo1 from '/company/vnglogo.png';
 import { UserContext } from '../userContext/userContext';
 
-const SingleJob = ({ id, title, salary, address, category, user_id }) => {
+const SingleJob = ({ id, title, salary, address, category, user_id,companyName }) => {
   const [isHoveredLove, setIsHoveredLove] = useState(false);
-  const [userName, setUserName] = useState("");
+  // const [userName, setUserName] = useState({companyName});
   const navigate = useNavigate();
   // const { userInfo, token } = useContext(UserContext);
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const token = localStorage.getItem("TOKEN");
+  console.log(companyName);
 
-  useEffect(() => {
-    const fetchUserName = async () => {
-      try {
-        const response = await axios.get(userInfo.role === "jobseeker"
-          ? `http://localhost:5000/jobseeker/viewUser/${user_id}`
-          : `http://localhost:5000/recruiter/viewUser/${user_id}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-        setUserName(response.data?.data.userName || "Không xác định");
-      } catch (error) {
-        console.error("Lỗi khi lấy userName:", error);
-        setUserName("Không xác định");
-      }
-    };
+  // useEffect(() => {
+  //   const fetchUserName = async () => {
+  //     try {
+  //       const response = await axios.get(userInfo.role === "jobseeker"
+  //         ? `http://localhost:5000/jobseeker/viewUser/${user_id}`
+  //         : `http://localhost:5000/recruiter/viewUser/${user_id}`,
+  //         {
+  //           headers: { Authorization: `Bearer ${token}` },
+  //         });
+  //       setUserName(response.data?.data.userName || "Không xác định");
+  //     } catch (error) {
+  //       console.error("Lỗi khi lấy userName:", error);
+  //       setUserName("Không xác định");
+  //     }
+  //   };
 
-    if (user_id) {
-      fetchUserName();
-    }
-  }, [user_id]);
+  //   if (user_id) {
+  //     fetchUserName();
+  //   }
+  // }, [user_id]);
 
   const handleJobClick = (id) => {
     if (userInfo.role === "jobseeker") {
@@ -71,7 +72,7 @@ const SingleJob = ({ id, title, salary, address, category, user_id }) => {
         <div className="border-l-2 border-gray-500 h-[60px] mx-2"></div>
         <div className="com_right ml-2">
           <div className='text-left'> 
-            <p className='text-sm font-medium mb-1 text-gray-500'>{userName}</p>
+            <p className='text-sm font-medium mb-1 text-gray-500'>{companyName}</p>
           </div> 
           <div className="flex items-center mb-1">
             <span className="text-sm font-medium"><RiMoneyDollarCircleLine /></span>
@@ -94,7 +95,8 @@ const JobHome = () => {
   const [selectedFilter, setSelectedFilter] = useState(''); // Bộ lọc đã chọn
   const [showOptions, setShowOptions] = useState(false);  // Điều khiển việc hiển thị lựa chọn bộ lọc
   const [selectedOptions, setSelectedOptions] = useState([]);  // Lưu các lựa chọn đã chọn
-  const { userInfo, token, isLoggedIn } = useContext(UserContext);
+  const userInfo = JSON.parse(localStorage.getItem("USER"));
+  const token = localStorage.getItem("TOKEN");
 
   const location = useLocation();
   //const isHomePage = location.pathname === '/';
@@ -208,7 +210,7 @@ const JobHome = () => {
     } else {
       fetchJobsByCategory(selectedOptions);
     }
-  }, [selectedOptions, isLoggedIn, userInfo, token]);
+  }, [selectedOptions]);
 
   return (
     <div className='w-[90%] m-auto'>
@@ -289,7 +291,7 @@ const JobHome = () => {
           error === "No posts found in these categories" ? (
             <div>Không có công việc phù hợp</div> // Xử lý lỗi không có bài đăng
           ) : (
-            <div className="text-red-500">Có lỗi khi lấy dữ liệu: {error.message}</div> // Xử lý lỗi khác
+            <div className="text-red-500">Có lỗi khi lấy dữ liệu</div> // Xử lý lỗi khác
           )
         ) : jobs.length > 0 ? (
           jobs.map((job) => (
@@ -302,6 +304,7 @@ const JobHome = () => {
               address={job.address}
               category={job.category}
               user_id={job.user_id}
+              companyName={job.companyName}
             />
           ))
         ) : (
