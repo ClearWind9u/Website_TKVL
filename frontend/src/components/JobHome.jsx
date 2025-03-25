@@ -289,7 +289,7 @@ const JobHome = () => {
           error === "No posts found in these categories" ? (
             <div>Không có công việc phù hợp</div> // Xử lý lỗi không có bài đăng
           ) : (
-            <div className="text-red-500">Có lỗi khi lấy dữ liệu: {error}</div> // Xử lý lỗi khác
+            <div className="text-red-500">Có lỗi khi lấy dữ liệu: {error.message}</div> // Xử lý lỗi khác
           )
         ) : jobs.length > 0 ? (
           jobs.map((job) => (
