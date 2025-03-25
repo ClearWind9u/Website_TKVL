@@ -7,7 +7,7 @@ import { UserContext } from "../userContext/userContext";
 
 const NavBar = () => {
   const navigate = useNavigate();
-  const { userInfo, logout } = useContext(UserContext);
+  const { logout } = useContext(UserContext);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const notifications = [
@@ -15,11 +15,16 @@ const NavBar = () => {
     "Bạn có một tin nhắn mới từ nhà tuyển dụng HCMUT.",
     "Đừng quên hoàn thành hồ sơ ứng tuyển của bạn trước 13/12/2024 nhé!"
   ];
+  // console.log(userInfo);
+  const userInfo = JSON.parse(localStorage.getItem("USER"));
+  console.log(userInfo.role);
+  console.log(localStorage.getItem("TOKEN"));
 
   const handleAvatarClick = () => setIsDropdownVisible(!isDropdownVisible);
   const handleLogout = () => {
     setIsDropdownVisible(false);
     logout();
+
     navigate('/login');
   };
   const handleBellClick = () => setIsOpen(!isOpen);
@@ -73,22 +78,14 @@ const NavBar = () => {
             </div>
             <div className="flex items-center gap-2">
               <div className="relative" onClick={handleAvatarClick}>
-                {userInfo.avatar ? (
-                  <img src={userInfo.avatar} alt="Avatar" className="w-[35px] h-[35px] rounded-full border cursor-pointer" />
-                ) : (
-                  <FaUserCircle className="w-[35px] h-[35px] text-gray-500 cursor-pointer" />
-                )}
+                <FaUserCircle className="w-[35px] h-[35px] text-gray-500 cursor-pointer" />
               </div>
-              <span className="text-sm text-gray-600">{userInfo.role === "recruiter" ? "Nhà tuyển dụng" : "Người tìm việc"}</span>
+              <span className="text-sm text-gray-600">{(userInfo.role === "recruiter") ? "Nhà tuyển dụng" : "Người tìm việc"}</span>
             </div>
             {isDropdownVisible && (
               <div className="absolute top-[50px] right-0 bg-white border-2 border-gray-300 rounded-lg w-[250px] shadow-md p-4 z-9999">
                 <div className="flex flex-col items-center gap-3 mb-4">
-                  {userInfo.avatar ? (
-                    <img src={userInfo.avatar} alt="User Avatar" className="w-[80px] h-[80px] rounded-full object-cover" />
-                  ) : (
-                    <FaUserCircle className="w-[80px] h-[80px] rounded-full object-cover text-gray-500" />
-                  )}
+                  <FaUserCircle className="w-[80px] h-[80px] rounded-full object-cover text-gray-500" />
                   <div className="text-center">
                     <h2 className="font-semibold">{userInfo.name}</h2>
                     <p className="text-sm text-gray-500">{userInfo.email}</p>

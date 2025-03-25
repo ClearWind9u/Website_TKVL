@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
-import UserContext from "../userContext/userContext";
+// import UserContext from "../userContext/userContext";
 import { useNavigate } from "react-router-dom";
 // var profileLocal = {
 //   Name: "Tran Thanh Phong",
@@ -20,8 +20,9 @@ import { useNavigate } from "react-router-dom";
 // };
 
 const Profile = () => {
-  const {userInfo} = useContext(UserContext);
+  // const {userInfo} = useContext(UserContext);
   // const [profile, setProfile] = useState(profileLocal);
+  const userInfo = JSON.parse(localStorage.getItem("USER"));
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadError, setUploadError] = useState("");

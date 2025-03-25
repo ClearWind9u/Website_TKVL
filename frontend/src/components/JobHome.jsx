@@ -15,7 +15,10 @@ const SingleJob = ({ id, title, salary, address, category, user_id }) => {
   const [isHoveredLove, setIsHoveredLove] = useState(false);
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
-  const { userInfo, token } = useContext(UserContext);
+  // const { userInfo, token } = useContext(UserContext);
+
+  const userInfo = JSON.parse(localStorage.getItem("USER"));
+  const token = localStorage.getItem("TOKEN");
 
   useEffect(() => {
     const fetchUserName = async () => {
@@ -92,8 +95,8 @@ const JobHome = () => {
   const [selectedFilter, setSelectedFilter] = useState(''); // Bộ lọc đã chọn
   const [showOptions, setShowOptions] = useState(false);  // Điều khiển việc hiển thị lựa chọn bộ lọc
   const [selectedOptions, setSelectedOptions] = useState([]);  // Lưu các lựa chọn đã chọn
-  const { userInfo, token, isLoggedIn } = useContext(UserContext);
-
+  const {  token, isLoggedIn } = useContext(UserContext);
+  const userInfo = localStorage.getItem("USER");
   const location = useLocation();
   //const isHomePage = location.pathname === '/';
 
@@ -207,7 +210,7 @@ const JobHome = () => {
       fetchJobsByCategory(selectedOptions);
     }
   }, [selectedOptions, isLoggedIn, userInfo, token]);
-
+  // console.log(localStorage.getItem("TOKEN"));
   return (
     <div className='w-[90%] m-auto'>
       <div className='TitleJobsection text-[30px] flex mt-5 justify-between items-center'>
@@ -287,7 +290,7 @@ const JobHome = () => {
           error === "No posts found in these categories" ? (
             <div>Không có công việc phù hợp</div> // Xử lý lỗi không có bài đăng
           ) : (
-            <div className="text-red-500">Có lỗi khi lấy dữ liệu: {error}</div> // Xử lý lỗi khác
+            <div className="text-red-500">Có lỗi khi lấy dữ liệu: {error.message}</div> // Xử lý lỗi khác
           )
         ) : jobs.length > 0 ? (
           jobs.map((job) => (

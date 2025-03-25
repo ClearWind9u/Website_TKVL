@@ -13,7 +13,9 @@ const Job = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { userInfo, token, isLoggedIn } = useContext(UserContext);
+  const {  isLoggedIn } = useContext(UserContext);
+  const userInfo = JSON.parse(localStorage.getItem("USER"));
+  const token = localStorage.getItem("TOKEN");
 
   const fetchJobs = async () => {
     try {
@@ -43,7 +45,7 @@ const Job = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, [isLoggedIn, userInfo, token]);
+  }, []);
 
   const handleSort = (criteria) => {
     setSelectedSort(criteria);
@@ -100,7 +102,7 @@ const Job = () => {
         {loading ? (
           <p>Đang tải công việc...</p>
         ) : error ? (
-          <p className="text-red-500">{error}</p>
+          <p className="text-red-500">{error.message}</p>
         ) : Array.isArray(jobs) && jobs.length > 0 ? (
           jobs.map((job) => (
             <SingleJob

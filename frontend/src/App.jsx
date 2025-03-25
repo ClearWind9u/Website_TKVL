@@ -29,7 +29,17 @@ const App = () => {
         {!hideImgBg && <ImgBg className="top-0 left-0 w-full h-full -z-10" />}
         <div className="flex-grow">
           <Routes>
-            <Route path="/" element={<Navigate to="/login" />} />
+            {(localStorage.getItem("TOKEN") && localStorage.getItem("USER")) ? (
+              <Route
+                path="/"
+                element={
+                  <Navigate to={`/${JSON.parse(localStorage.getItem("USER")).role}`} />
+                }
+              />
+            ) : (
+              <Route path="/" element={<Navigate to="/login" />} />
+            )}
+
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route path="/jobseeker" element={
@@ -55,6 +65,7 @@ const App = () => {
               <Route path="profile" element={<Profile />} />
               <Route path="job" element={<Job />} />
               <Route path="create" element={<CreateJob />} />
+              <Route path="candidate" element={<Candidate />} />
               <Route path="jobDetail/:id" element={<CompDetail />} />
             </Route>
             <Route path="/admin" element={
