@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../userContext/userContext";
 
 const ProtectedRoute = (props) => {
-    const { token } = useContext(UserContext);
+    //const { token } = useContext(UserContext);
+    const token = localStorage.getItem("TOKEN");
 
     const navigate = useNavigate();
 

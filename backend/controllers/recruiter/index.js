@@ -157,5 +157,16 @@ const editProfile = async (req, res) => {
         res.status(500).json({ success: false, message: error.message });
     }
 };
-
-module.exports = { deleteAccount, viewUser, viewAllPosts, viewPostsByCategory, createPost, viewAllCV, viewCV , deletePost, editPost, editProfile};
+const viewPostById = async (req,res) => {
+    try{
+        const postId = req.params.id;
+        const post = await Post.findById(postId);
+        if(!post) return res.status(404).json({success: false, message: 'Post not found'});
+        res.status(200).json({success: true, post: post});
+    }
+    catch(error)
+    {
+        res.status(500).json({success: false, message: error.message });
+    }
+};  
+module.exports = { viewPostById, deleteAccount, viewUser, viewAllPosts, viewPostsByCategory, createPost, viewAllCV, viewCV , deletePost, editPost, editProfile};

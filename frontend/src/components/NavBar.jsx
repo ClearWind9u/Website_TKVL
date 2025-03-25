@@ -8,6 +8,10 @@ import { UserContext } from "../userContext/userContext";
 const NavBar = () => {
   const navigate = useNavigate();
   const { logout } = useContext(UserContext);
+<<<<<<< HEAD
+=======
+  const userInfo = JSON.parse(localStorage.getItem("USER"));
+>>>>>>> b0cd11081c38e6d3b95b66c074e98451f1068ffa
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const notifications = [
@@ -27,7 +31,9 @@ const NavBar = () => {
 
     navigate('/login');
   };
-  const handleBellClick = () => setIsOpen(!isOpen);
+  const handleBellClick = () => {
+    setIsOpen(!isOpen);
+  }
 
   const menuItems = userInfo?.role === "recruiter" ? [
     { path: "/recruiter/homepage", label: "Trang chủ" },

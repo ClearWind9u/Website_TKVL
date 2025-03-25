@@ -14,7 +14,7 @@ import { BiGridAlt } from "react-icons/bi";
 import { FaUsers } from "react-icons/fa";
 import { FaFlag } from "react-icons/fa";
 import axios from "axios";
-import UserContext from '../userContext/userContext';
+
 const CompDetail = () => {
   const [isReportOpen, setIsReportOpen] = useState(false); // Trạng thái mở/đóng modal báo cáo
   const [selectedReason, setSelectedReason] = useState(""); // Lý do báo cáo
@@ -28,7 +28,9 @@ const CompDetail = () => {
   const [isCVModalOpen, setIsCVModalOpen] = useState(false); // Trạng thái mở/đóng modal chọn CV
   const [cvList, setCVList] = useState([]); // Danh sách CV của người dùng
   const [selectedCVId, setSelectedCVId] = useState(null); // ID của CV được chọn
-  const { userInfo, token } = useContext(UserContext);
+  //const { userInfo, token } = useContext(UserContext);
+  const userInfo = JSON.parse(localStorage.getItem("USER"));
+  const token = localStorage.getItem("TOKEN");
   const navigate = useNavigate();
   const handleReportClick = () => {
     setIsReportOpen(true); // Mở modal báo cáo
@@ -48,20 +50,28 @@ const CompDetail = () => {
     const fetchJobDetail = async () => {
       try {
         const response1 = await axios.get(userInfo?.role === 'jobseeker' ?
-          `http://localhost:5000/jobseeker/${id}` : `http://localhost:5000/recruiter/${id}`,
-        );
-        setJobDetail(response1.data);
-        const response2 = await axios.get(userInfo?.role === 'jobseeker' ? "http://localhost:5000/jobseeker" : "http://localhost:5000/recruiter", {
-          withCredentials: true,
+          `http://localhost:5000/jobseeker/viewPost/${id}` : `http://localhost:5000/recruiter/viewPost/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        const allJobs = response2.data;
+        setJobDetail(response1.data);
+        const response2 = await axios.get(
+          userInfo.role === "jobseeker"
+            ? "http://localhost:5000/jobseeker/viewAllPosts"
+            : "http://localhost:5000/recruiter/viewAllPosts",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        const allJobs = Array.isArray(response2.data.data) ? response2.data.data : [];
+
+        // Chọn ngẫu nhiên 7 công việc
         const randomJobs = allJobs.sort(() => Math.random() - 0.5).slice(0, 7);
 
         setJobRamdom(randomJobs);
-        const cvResponse = await axios.get(`http://localhost:5000/jobseeker/info/CV`, {
-          withCredentials: true,
-        });
-        setCVList(cvResponse.data.CVProfile.data);
+        // const cvResponse = await axios.get(`http://localhost:5000/jobseeker/info/CV`, {
+        //   withCredentials: true,
+        // });
+        // setCVList(cvResponse.data.CVProfile.data);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -70,6 +80,11 @@ const CompDetail = () => {
     };
     fetchJobDetail();
   }, [id]);
+
+  useEffect(() => {
+    console.log("Job Detail:", jobDetail);
+  }, [jobDetail]);
+  
   const handleApplyClick = () => {
     setIsCVModalOpen(true);
   };
@@ -136,9 +151,9 @@ const CompDetail = () => {
 
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div className="text-red-500">Lỗi: {error}</div>;
-  const description = jobDetail?.data.detail.description || "";
-  const request = jobDetail?.data.detail.request || "";
-  const benefit = jobDetail?.data.detail.benefit || "";
+  const description = jobDetail.post?.content || "";
+  const request = "";
+  const benefit = "";
 
   const splitTextToSentences = (text) => {
     return text
@@ -162,18 +177,19 @@ const CompDetail = () => {
             <SingleJob
               key={job._id}
               id={job._id}
-              image={logo1}
               title={job.title}
-              company={job.nameCompany}
+              content={job.content}
               salary={job.salary}
-              location={job.address}
+              address={job.address}
+              category={job.category}
+              user_id={job.user_id}
             />
           ))}
         </div>
 
         <div className="infoDetail flex-column gap-10 justify-center flex-wrap items-center py-5 border-2 border-black p-4 rounded-[20px]">
           <div className="JobTitleBox text-[30px] flex justify-between items-center ml-4 font-bold">
-            {jobDetail.data.title}
+            {jobDetail.post.title}
           </div>
 
           <div className="ChecklistBox mt-4">
@@ -185,7 +201,7 @@ const CompDetail = () => {
                 <div className="flex flex-col">
                   <span className="font-bold text-lg">Mức lương:</span>
                   <span className="text-md text-gray-500">
-                    {jobDetail.data.salary}
+                    {jobDetail.post.salary}
                   </span>
                 </div>
               </div>
@@ -197,7 +213,7 @@ const CompDetail = () => {
                 <div className="flex flex-col">
                   <span className="font-bold text-lg">Địa điểm:</span>
                   <span className="text-md text-gray-500">
-                    {jobDetail.data.address}
+                    {jobDetail.post.address}
                   </span>
                 </div>
               </div>
@@ -209,7 +225,7 @@ const CompDetail = () => {
                 <div className="flex flex-col">
                   <span className="font-bold text-lg">Kinh nghiệm:</span>
                   <span className="text-md text-gray-500">
-                    {jobDetail.data.experience}
+                    {jobDetail.post.experience}
                   </span>
                 </div>
               </div>
@@ -536,10 +552,10 @@ const CompDetail = () => {
             ) : null}
           </div>
 
+        </div>
       </div>
     </div>
-    </div>
-        );
+  );
 };
 
 export default CompDetail;

@@ -16,7 +16,6 @@ const SingleJob = ({ id, title, salary, address, category, user_id }) => {
   const [userName, setUserName] = useState("");
   const navigate = useNavigate();
   // const { userInfo, token } = useContext(UserContext);
-
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const token = localStorage.getItem("TOKEN");
 
@@ -41,7 +40,7 @@ const SingleJob = ({ id, title, salary, address, category, user_id }) => {
     }
   }, [user_id]);
 
-  const handleJobClick = () => {
+  const handleJobClick = (id) => {
     if (userInfo.role === "jobseeker") {
       navigate(`/jobseeker/jobDetail/${id}`);
     } else {
@@ -52,7 +51,7 @@ const SingleJob = ({ id, title, salary, address, category, user_id }) => {
   return (
     <div
       className="singleJob w-[280px] h-auto p-[15px] bg-white rounded-[20px] border border-black cursor-pointer shadow-[4px_4px_6px_rgba(0,_0,_0,_0.3)]"
-      onClick={handleJobClick}
+      onClick={() => handleJobClick(id)}
     >
       <div className="com_top flex justify-between items-center mb-2">
         <h2 className="text-lg font-bold">{title}</h2>
@@ -95,8 +94,8 @@ const JobHome = () => {
   const [selectedFilter, setSelectedFilter] = useState(''); // Bộ lọc đã chọn
   const [showOptions, setShowOptions] = useState(false);  // Điều khiển việc hiển thị lựa chọn bộ lọc
   const [selectedOptions, setSelectedOptions] = useState([]);  // Lưu các lựa chọn đã chọn
-  const {  token, isLoggedIn } = useContext(UserContext);
-  const userInfo = localStorage.getItem("USER");
+  const { userInfo, token, isLoggedIn } = useContext(UserContext);
+
   const location = useLocation();
   //const isHomePage = location.pathname === '/';
 
@@ -146,7 +145,7 @@ const JobHome = () => {
 
   const fetchJobsByCategory = async (categories) => {
     try {
-      if (!isLoggedIn || !userInfo) {
+      if (!userInfo) {
         setError({ message: "Vui lòng đăng nhập để xem công việc." });
         setLoading(false);
         return;
@@ -178,7 +177,7 @@ const JobHome = () => {
 
   const fetchJobs = async () => {
     try {
-      if (!isLoggedIn || !userInfo) {
+      if (!userInfo) {
         setError({ message: "Vui lòng đăng nhập để xem công việc." });
         setLoading(false);
         return;
@@ -210,7 +209,7 @@ const JobHome = () => {
       fetchJobsByCategory(selectedOptions);
     }
   }, [selectedOptions, isLoggedIn, userInfo, token]);
-  // console.log(localStorage.getItem("TOKEN"));
+
   return (
     <div className='w-[90%] m-auto'>
       <div className='TitleJobsection text-[30px] flex mt-5 justify-between items-center'>
@@ -290,12 +289,13 @@ const JobHome = () => {
           error === "No posts found in these categories" ? (
             <div>Không có công việc phù hợp</div> // Xử lý lỗi không có bài đăng
           ) : (
-            <div className="text-red-500">Có lỗi khi lấy dữ liệu: {error.message}</div> // Xử lý lỗi khác
+            <div className="text-red-500">Có lỗi khi lấy dữ liệu: {error}</div> // Xử lý lỗi khác
           )
         ) : jobs.length > 0 ? (
           jobs.map((job) => (
             <SingleJob
               key={job._id}
+              id={job._id}
               title={job.title}
               content={job.content}
               salary={job.salary}

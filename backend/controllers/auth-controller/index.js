@@ -24,7 +24,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req,res) => {
     const {userEmail, password, role} = req.body;
     const existingUser = await User.findOne({userEmail})
-    if(!existingUser || !(bycrypt.compare(password,existingUser.password)))
+    if(!existingUser || !( await bycrypt.compare(password,existingUser.password)))
     {
         return res.status(401).json({
             success: false,
@@ -43,7 +43,6 @@ const loginUser = async (req,res) => {
         userEmail: existingUser.userEmail,
         role: existingUser.role
     }, process.env.JWT_SECRET, {expiresIn: '360m'})
-    // console.log("success login");
     res.status(200).json({
         success: true,
         message: 'Logged in successfully',

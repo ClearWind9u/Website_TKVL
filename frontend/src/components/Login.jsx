@@ -12,8 +12,7 @@ const Login = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const { login,setUserInfo } = useContext(UserContext);
-  //const { token,setToken } = useContext(UserContext);
+  const { login} = useContext(UserContext);
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
