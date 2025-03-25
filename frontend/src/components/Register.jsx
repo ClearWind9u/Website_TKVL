@@ -50,9 +50,7 @@ const Register = () => {
         address: formData.address,
         dayofBirth: formData.birthday,
         password: formData.password,
-        role: "jobseeker",
-        dayofBirth: formData.birthday,
-        address: formData.address
+        role: "jobseeker"
       });
 
       if (response.data.success) {

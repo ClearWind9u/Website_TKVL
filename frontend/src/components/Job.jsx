@@ -13,11 +13,12 @@ const Job = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { userInfo, token, isLoggedIn } = useContext(UserContext);
+  const userInfo = JSON.parse(localStorage.getItem("USER"));
+  const token = localStorage.getItem("TOKEN");
 
   const fetchJobs = async () => {
     try {
-      if (!isLoggedIn || !userInfo) {
+      if (!userInfo) {
         setError({ message: "Vui lòng đăng nhập để xem công việc." });
         setLoading(false);
         return;
@@ -43,7 +44,7 @@ const Job = () => {
 
   useEffect(() => {
     fetchJobs();
-  }, [isLoggedIn, userInfo, token]);
+  }, []);
 
   const handleSort = (criteria) => {
     setSelectedSort(criteria);
@@ -105,6 +106,7 @@ const Job = () => {
           jobs.map((job) => (
             <SingleJob
               key={job._id}
+              id={job._id}
               title={job.title}
               content={job.content}
               salary={job.salary}

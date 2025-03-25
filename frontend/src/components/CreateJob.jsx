@@ -23,7 +23,9 @@ const CreateJob = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const { userInfo, token } = useContext(UserContext);
+  //const { userInfo, token } = useContext(UserContext);
+  const userInfo = JSON.parse(localStorage.getItem("USER"));
+  const token = localStorage.getItem("TOKEN");
   const navigate = useNavigate();
 
   // Xử lý thay đổi input

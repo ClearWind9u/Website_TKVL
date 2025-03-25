@@ -2,46 +2,14 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import UserContext from "../userContext/userContext";
 import { useNavigate } from "react-router-dom";
-// var profileLocal = {
-//   Name: "Tran Thanh Phong",
-//   email: "abc@GiMailShirt.com",
-//   CCCD: 123123123,
-//   location: "HCM city",
-//   CVProfile: [
-//     {
-//       name: "Phong",
-//       _id: 2212571,
-//       cvFile: {
-//         contentType: "pdf",
-//         name: "abc",
-//       },
-//     },
-//   ],
-// };
 
 const Profile = () => {
-  const {userInfo} = useContext(UserContext);
-  // const [profile, setProfile] = useState(profileLocal);
+  const userInfo = JSON.parse(localStorage.getItem("USER"));
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadError, setUploadError] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState("");
   const navigate = useNavigate();
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     try {
-  //       const response = await axios.get("http://localhost:5000/jobseeker/info", {
-  //         withCredentials: true,
-  //       });
-  //       setProfile(response.data.user);
-  //     } catch (error) {
-  //       setError(error.message);
-  //     }
-  //   };
-
-  //   fetchProfile();
-  // }, []);
-
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);

@@ -36,7 +36,7 @@ const App = () => {
               <ProtectedRoute name="jobseeker">
                 <Jobseeker />
               </ProtectedRoute>
-            }>
+            }>  
               <Route index element={<Navigate to="/jobseeker/homepage" replace />} />
               <Route path="homepage" element={<Home />} />
               <Route path="profile" element={<Profile />} />
