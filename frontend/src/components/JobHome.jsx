@@ -9,7 +9,6 @@ import { IoIosArrowDropleft, IoIosArrowDropright, IoIosArrowDropleftCircle, IoIo
 import axios from 'axios';
 import { useLocation } from 'react-router-dom'; // Để lấy thông tin vị trí trang hiện tại
 import logo1 from '/company/vnglogo.png';
-import { UserContext } from '../userContext/userContext';
 
 const SingleJob = ({ id, title, salary, address, category, user_id }) => {
   const [isHoveredLove, setIsHoveredLove] = useState(false);
