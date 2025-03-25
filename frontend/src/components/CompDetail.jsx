@@ -152,7 +152,7 @@ const CompDetail = () => {
   if (loading) return <div>Đang tải...</div>;
   if (error) return <div className="text-red-500">Lỗi: {error}</div>;
   const description = jobDetail.post?.content || "";
-  const request = "";
+  const request = jobDetail.post?.category[2] || "";
   const benefit = "";
 
   const splitTextToSentences = (text) => {

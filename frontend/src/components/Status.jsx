@@ -15,7 +15,7 @@ const State = () => {
   useEffect(() => {
     const fetchAppliedArticles = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/jobseeker/info/listApply', { withCredentials: true });
+        const response = await axios.get('http://localhost:5000/jobseeker/info/listApply', { withCredentials: true });
         if (response.data && response.data.data) {
           setAppliedArticles(response.data.data);
         }
