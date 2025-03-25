@@ -101,7 +101,7 @@ const Job = () => {
         {loading ? (
           <p>Đang tải công việc...</p>
         ) : error ? (
-          <p className="text-red-500">{error}</p>
+          <p className="text-red-500">{error.message}</p>
         ) : Array.isArray(jobs) && jobs.length > 0 ? (
           jobs.map((job) => (
             <SingleJob
@@ -113,6 +113,7 @@ const Job = () => {
               address={job.address}
               category={job.category}
               user_id={job.user_id}
+              companyName={job.companyName}
             />
           ))
         ) : (

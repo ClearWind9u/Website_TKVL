@@ -84,7 +84,7 @@ const CompDetail = () => {
   useEffect(() => {
     console.log("Job Detail:", jobDetail);
   }, [jobDetail]);
-  
+
   const handleApplyClick = () => {
     setIsCVModalOpen(true);
   };
@@ -167,12 +167,12 @@ const CompDetail = () => {
   const benefitSentences = splitTextToSentences(benefit);
 
   return (
-    <div className="w-[90%] m-auto">
+    <div className="w-[90%] m-auto mb-[30px] ">
       <div className="TitleJobsection text-[30px] flex mt-5 justify-between items-center mb-5">
         <h1 className="text-2xl font-bold">Chi tiết công việc</h1>
       </div>
-      <div className="flex gap-[1.5rem] justify-between m-auto">
-        <div className="jobContainer flex flex-col gap-[20px] items-center">
+      <div className="flex gap-[1.5rem] justify-around m-auto">
+        <div className="jobContainer flex flex-wrap gap-[20px] items-center w-[40%] ">
           {jobRandom.map((job) => (
             <SingleJob
               key={job._id}
@@ -183,11 +183,12 @@ const CompDetail = () => {
               address={job.address}
               category={job.category}
               user_id={job.user_id}
+              companyName={job.companyName}
             />
           ))}
         </div>
 
-        <div className="infoDetail flex-column gap-10 justify-center flex-wrap items-center py-5 border-2 border-black p-4 rounded-[20px]">
+        <div className="infoDetail flex-column flex-1 gap-10 justify-center flex-wrap items-center py-5 border-2 border-black p-4 rounded-[20px]">
           <div className="JobTitleBox text-[30px] flex justify-between items-center ml-4 font-bold">
             {jobDetail.post.title}
           </div>
@@ -225,7 +226,7 @@ const CompDetail = () => {
                 <div className="flex flex-col">
                   <span className="font-bold text-lg">Kinh nghiệm:</span>
                   <span className="text-md text-gray-500">
-                    {jobDetail.post.experience}
+                    {jobDetail.post.category[3]}
                   </span>
                 </div>
               </div>
@@ -233,7 +234,7 @@ const CompDetail = () => {
           </div>
 
           <div className="ButtonDiv flex gap-5 m-4">
-            {userInfo?.role === 'Jobseeker' ? (
+            {userInfo?.role === 'jobseeker' ? (
               <>
                 {/* Nút Ứng tuyển ngay */}
                 <button
@@ -296,7 +297,7 @@ const CompDetail = () => {
                   </span>
                 </button>
               </>
-            ) : userInfo?.role === 'Recruiter' ? (
+            ) : userInfo?.role === 'recruiter' ? (
               <>
                 {/* Nút sửa */}
                 <button
@@ -341,6 +342,14 @@ const CompDetail = () => {
                   <span>{sentence}</span>
                 </div>
               ))}
+              <div className="flex flex-start">
+                <span className="text-xl font-bold text-black mr-2">•</span>
+                <span>{jobDetail.post.category[4]}</span>
+              </div>
+              <div className="flex flex-start">
+                <span className="text-xl font-bold text-black mr-2">•</span>
+                <span>{jobDetail.post.category[5]}</span>
+              </div>
             </div>
           </div>
 
@@ -348,17 +357,15 @@ const CompDetail = () => {
             {/* Tiêu đề*/}
             <div className="flex items-center text-xl ml-4 font-bold">
               <PiListMagnifyingGlassLight className="ml-2 text-gray-800 text-xl mr-2" />
-              <span>Yêu cầu ứng viên</span>
+              <span>Lĩnh vực</span>
             </div>
 
             {/* Nội dung bullet list */}
             <div className="flex-col gap-1 ml-10">
-              {requestSentences.map((sentence, index) => (
-                <div key={index} className="flex items-start">
-                  <span className="text-xl font-bold text-black mr-2">•</span>
-                  <span>{sentence}</span>
-                </div>
-              ))}
+              <div className="flex flex-start">
+                <span className="text-xl font-bold text-black mr-2">•</span>
+                <span>{jobDetail.post.category[2]}</span>
+              </div>
             </div>
           </div>
 
@@ -380,8 +387,44 @@ const CompDetail = () => {
             </div>
           </div>
 
-          <div className="p-6 bg-white border border-black rounded-[20px] shadow-md text-center h-fit w-[400px] relative">
-            {/* Nút báo cáo */}
+
+
+        </div>
+        <div className="p-[10px] border-[2px] border-black rounded-[20px] h-fit ">
+          <div className="w-[100px] h-[100px] mx-auto rounded-full border border-black flex items-center justify-center">
+            <img
+              src="https://picsum.photos/200/300"
+              alt="Company Logo"
+              className="w-[100%] h-[100%] object-cover rounded-full"
+            />
+          </div>
+          <h2 className="text-xl font-semibold mt-4">
+            {jobDetail.post.companyName}
+          </h2>
+          <div className="text-left mt-6">
+            <div className="flex items-center gap-2 mb-3">
+              <BiGridAlt className="text-gray-500 text-lg" />
+              <span className="text-lg font-bold">
+                Lĩnh vực:{" "}
+                <span className="font-medium">Công nghệ thông tin</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <FaUsers className="text-gray-500 text-lg" />
+              <span className="text-lg font-bold">
+                Quy mô: <span className="font-medium">1000 nhân viên</span>
+              </span>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <IoLocationOutline className="text-gray-500 text-lg" />
+              <span className="text-lg font-bold">
+                Địa điểm:{" "}
+                <span className="font-medium">268 Lý Thường Kiệt Quận 10</span>
+              </span>
+            </div>
+          </div>
+        </div>
+        {/* <div className="p-6 bg-white border border-black rounded-[20px] shadow-md text-center h-fit w-[400px] relative">
             <button
               onClick={handleReportClick}
               className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition"
@@ -389,7 +432,6 @@ const CompDetail = () => {
               <FaFlag className="text-2xl" />
             </button>
 
-            {/* Nội dung chính */}
             <div className="nameDiv">
               <div className="w-[100px] h-[100px] mx-auto rounded-full border border-black flex items-center justify-center">
                 <img
@@ -407,13 +449,11 @@ const CompDetail = () => {
               </div>
 
               <div className="LocationDiv flex flex-col gap-4 p-4">
-                {/* Tiêu đề */}
                 <div className="flex items-center text-xl ml-4 font-bold">
                   <IoMdTime className="ml-2 text-gray-500 text-lg mr-2" />
                   <span>Thời gian làm việc</span>
                 </div>
 
-                {/* Nội dung bullet list */}
                 <div className="flex-col gap-1 ml-10">
                   <div className="flex items-start">
                     <span className="text-xl font-bold text-black mr-2">•</span>
@@ -424,7 +464,7 @@ const CompDetail = () => {
             </div>
             {(userInfo?.role === 'Jobseeker' || 'Recruiter') ? (
               <div className="relative p-6 bg-white border border-black rounded-[20px] shadow-md text-center h-fit w-[400px]">
-                {/* Nút báo cáo */}
+              
                 <button
                   onClick={handleReportClick}
                   className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition"
@@ -432,7 +472,6 @@ const CompDetail = () => {
                   <FaFlag className="text-2xl" />
                 </button>
 
-                {/* Nội dung chính */}
                 <div className="nameDiv">
                   <div className="w-[100px] h-[100px] mx-auto rounded-full border border-black flex items-center justify-center">
                     <img
@@ -471,13 +510,11 @@ const CompDetail = () => {
                   </button>
                 </div>
 
-                {/* Modal báo cáo */}
                 {isReportOpen && (
                   <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white w-[90%] md:w-[500px] p-6 rounded-[20px] shadow-lg">
                       <h2 className="text-xl font-semibold mb-4">Báo cáo công ty</h2>
 
-                      {/* Lý do báo cáo */}
                       <div className="mb-4">
                         <label className="block text-sm font-medium mb-2">
                           Lý do báo cáo:
@@ -496,7 +533,6 @@ const CompDetail = () => {
                         </select>
                       </div>
 
-                      {/* Ghi chú lý do khác */}
                       {selectedReason === "Khác" && (
                         <div className="mb-4">
                           <label className="block text-sm font-medium mb-2">
@@ -512,7 +548,6 @@ const CompDetail = () => {
                         </div>
                       )}
 
-                      {/* Minh chứng */}
                       <div className="mb-4">
                         <label className="block text-sm font-medium mb-2">
                           Minh chứng:
@@ -530,7 +565,6 @@ const CompDetail = () => {
                         )}
                       </div>
 
-                      {/* Nút hành động */}
                       <div className="flex justify-end gap-3">
                         <button
                           className="py-2 px-4 bg-gray-300 rounded hover:bg-gray-400"
@@ -550,9 +584,7 @@ const CompDetail = () => {
                 )}
               </div>
             ) : null}
-          </div>
-
-        </div>
+          </div> */}
       </div>
     </div>
   );
