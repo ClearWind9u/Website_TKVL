@@ -14,7 +14,8 @@ const NavBar = () => {
   const notifications = [
     "Có một công việc mới phù hợp với bạn từ Công ty XYZ.",
     "Bạn có một tin nhắn mới từ nhà tuyển dụng HCMUT.",
-    "Đừng quên hoàn thành hồ sơ ứng tuyển của bạn trước 13/12/2024 nhé!"
+    "Đừng quên hoàn thành hồ sơ ứng tuyển của bạn trước 13/12/2025 nhé!",
+    "Nhớ rằng luôn luôn có chúng mình đồng hành cùng bạn"
   ];
 
   const handleAvatarClick = () => setIsDropdownVisible(!isDropdownVisible);
@@ -103,7 +104,6 @@ const NavBar = () => {
                       Hồ sơ
                     </Link>
                   </li>
-                  <li className="cursor-pointer text-gray-700 hover:text-blue-500 py-2">Cài đặt</li>
                   <li className="cursor-pointer text-red-500 hover:text-red-600 flex items-center justify-center gap-2 py-2" onClick={handleLogout}>
                     <MdLogout className="text-lg" />
                     Đăng xuất
