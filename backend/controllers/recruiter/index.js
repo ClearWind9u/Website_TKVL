@@ -1,172 +1,224 @@
-const User = require('../../models/User');
-const Post = require('../../models/Post');
-const JobApplication = require('../../models/JobApplication');
+const User = require("../../models/User");
+const Post = require("../../models/Post");
+const JobApplication = require("../../models/JobApplication");
 
 const deleteAccount = async (req, res) => {
-    try {
-        const recruiterId = req.user._id;
-        await User.findByIdAndDelete(recruiterId);
-        res.status(200).json({ success: true, message: "Account deleted successfully" });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    const recruiterId = req.user._id;
+    await User.findByIdAndDelete(recruiterId);
+    res
+      .status(200)
+      .json({ success: true, message: "Account deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 const viewUser = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-        res.status(200).json({ success: true, data: user });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 const viewAllPosts = async (req, res) => {
-    try {
-        const posts = await Post.find({}); 
-        res.status(200).json({ success: true, data: posts });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    const posts = await Post.find({});
+    res.status(200).json({ success: true, data: posts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 const viewPostsByCategory = async (req, res) => {
-    try {
-        const categories = req.params.categories.split(','); 
-        const posts = await Post.find({ category: { $in: categories } });
-        res.status(200).json({ success: true, data: posts });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    const categories = req.params.categories.split(",");
+    const posts = await Post.find({ category: { $in: categories } });
+    res.status(200).json({ success: true, data: posts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 const createPost = async (req, res) => {
-    try {
-        const { title, content, salary, address, category } = req.body;
-        const newPost = new Post({
-            title,
-            content,
-            salary,
-            address,
-            user_id: req.user._id,
-            category
-        });
-        await newPost.save();
-        res.status(201).json({ success: true, message: "Post created successfully", post: newPost });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    const { title, content, salary, address, category } = req.body;
+    const newPost = new Post({
+      title,
+      content,
+      salary,
+      address,
+      user_id: req.user._id,
+      category,
+    });
+    await newPost.save();
+    res.status(201).json({
+      success: true,
+      message: "Post created successfully",
+      post: newPost,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 const viewAllCV = async (req, res) => {
-    try {
-        const recruiterJobs = await Post.find({ user_id: req.user._id }).select('_id');
-        const jobIds = recruiterJobs.map(job => job._id);
-        const applications = await JobApplication.find({ job_id: { $in: jobIds } }).populate('applicant_id', 'userName userEmail');
-        res.status(200).json({ success: true, data: applications });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    //mảng chứa các object chứa post_id của các bài Post của nhà tuyển dụng đó
+    const recruiterJobs = await Post.find({ user_id: req.user._id }).select(
+      "_id"
+    );
+    //mảng chỉ chứa các giá trị _id
+    const jobIds = recruiterJobs.map((job) => job._id);
+    const applications = await JobApplication.find({
+      job_id: { $in: jobIds },
+    }).populate("applicant_id", "userName userEmail");
+    console.log(
+      `các đơn ứng tuyển của nhà tuyển dụng ${req.user._id} là: ${applications}`
+    );
+    res.status(200).json({ success: true, data: applications });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 const viewCV = async (req, res) => {
-    try {
-        const application = await JobApplication.findById(req.params.id).populate('applicant_id', 'userName userEmail');
-        if (!application) {
-            return res.status(404).json({ success: false, message: "Application not found" });
-        }
-        res.status(200).json({ success: true, cv: application.cv, applicant: application.applicant_id });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+  try {
+    const application = await JobApplication.findById(req.params.id).populate(
+      "applicant_id",
+      "userName userEmail"
+    );
+    if (!application) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Application not found" });
     }
+    res.status(200).json({
+      success: true,
+      cv: application.cv,
+      applicant: application.applicant_id,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 const deletePost = async (req, res) => {
-    try {
-        const { postId } = req.body; 
-        const post = await Post.findById(postId);
+  try {
+    const { postId } = req.body;
+    const post = await Post.findById(postId);
 
-        if (!post) {
-            return res.status(404).json({ success: false, message: "Post not found" });
-        }
-
-        // Kiểm tra quyền sở hữu bài đăng
-        if (post.user_id.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ success: false, message: "Unauthorized to delete this post" });
-        }
-
-        await Post.findByIdAndDelete(postId);
-        res.status(200).json({ success: true, message: "Post deleted successfully" });
-
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+    if (!post) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
+
+    // Kiểm tra quyền sở hữu bài đăng
+    if (post.user_id.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized to delete this post" });
+    }
+
+    await Post.findByIdAndDelete(postId);
+    res
+      .status(200)
+      .json({ success: true, message: "Post deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 const editPost = async (req, res) => {
-    try {
-        const { postId, title, content, salary, address, category } = req.body;
-        const post = await Post.findById(postId);
+  try {
+    const { postId, title, content, salary, address, category } = req.body;
+    const post = await Post.findById(postId);
 
-        if (!post) {
-            return res.status(404).json({ success: false, message: "Post not found" });
-        }
-
-        // Kiểm tra quyền sở hữu bài đăng
-        if (post.user_id.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ success: false, message: "Unauthorized to edit this post" });
-        }
-
-        // Cập nhật thông tin bài đăng
-        post.title = title || post.title;
-        post.content = content || post.content;
-        post.salary = salary || post.salary;
-        post.address = address || post.address;
-        post.category = category || post.category;
-
-        await post.save();
-        res.status(200).json({ success: true, message: "Post updated successfully", post });
-
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+    if (!post) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
     }
+
+    // Kiểm tra quyền sở hữu bài đăng
+    if (post.user_id.toString() !== req.user._id.toString()) {
+      return res
+        .status(403)
+        .json({ success: false, message: "Unauthorized to edit this post" });
+    }
+
+    // Cập nhật thông tin bài đăng
+    post.title = title || post.title;
+    post.content = content || post.content;
+    post.salary = salary || post.salary;
+    post.address = address || post.address;
+    post.category = category || post.category;
+
+    await post.save();
+    res
+      .status(200)
+      .json({ success: true, message: "Post updated successfully", post });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 const editProfile = async (req, res) => {
-    try {
-        const { userName, userEmail, address, dayofBirth } = req.body;
+  try {
+    const { userName, userEmail, address, dayofBirth } = req.body;
 
-        const userId = req.user._id;
-        const user = await User.findById(userId);
+    const userId = req.user._id;
+    const user = await User.findById(userId);
 
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-
-        user.userName = userName || user.userName;
-        user.userEmail = userEmail || user.userEmail;
-        user.address = address || user.address;
-        user.dayofBirth = dayofBirth || user.dayofBirth;
-
-        await user.save();
-        res.status(200).json({ success: true, message: "Profile updated successfully", user });
-
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
+
+    user.userName = userName || user.userName;
+    user.userEmail = userEmail || user.userEmail;
+    user.address = address || user.address;
+    user.dayofBirth = dayofBirth || user.dayofBirth;
+
+    await user.save();
+    res
+      .status(200)
+      .json({ success: true, message: "Profile updated successfully", user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
-const viewPostById = async (req,res) => {
-    try{
-        const postId = req.params.id;
-        const post = await Post.findById(postId);
-        if(!post) return res.status(404).json({success: false, message: 'Post not found'});
-        res.status(200).json({success: true, post: post});
-    }
-    catch(error)
-    {
-        res.status(500).json({success: false, message: error.message });
-    }
-};  
-module.exports = { viewPostById, deleteAccount, viewUser, viewAllPosts, viewPostsByCategory, createPost, viewAllCV, viewCV , deletePost, editPost, editProfile};
+const viewPostById = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const post = await Post.findById(postId);
+    if (!post)
+      return res
+        .status(404)
+        .json({ success: false, message: "Post not found" });
+    res.status(200).json({ success: true, post: post });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+module.exports = {
+  viewPostById,
+  deleteAccount,
+  viewUser,
+  viewAllPosts,
+  viewPostsByCategory,
+  createPost,
+  viewAllCV,
+  viewCV,
+  deletePost,
+  editPost,
+  editProfile,
+};
