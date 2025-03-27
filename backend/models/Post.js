@@ -5,6 +5,7 @@ const PostSchema = new mongoose.Schema({
     salary: String,
     address: String,
     user_id: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    category: [String]
+    category: [String],
+    companyName: String
 }); 
 module.exports = mongoose.model('Post', PostSchema);

@@ -7,7 +7,7 @@ const Register = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    birthday: "",
+    dayofBirth: "",
     address: "",
     role: "jobseeker",
     password: "",
@@ -48,7 +48,7 @@ const Register = () => {
         userName: formData.name,
         userEmail: formData.email,
         address: formData.address,
-        dayofBirth: formData.birthday,
+        dayofBirth: formData.dayofBirth,
         password: formData.password,
         role: "jobseeker"
       });
@@ -82,7 +82,7 @@ const Register = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <input type="text" name="name" placeholder="Họ và tên" className="w-full p-2 border rounded" onChange={handleChange} />
             <input type="email" name="email" placeholder="Email (xxxxx@gmail.com)" className="w-full p-2 border rounded" onChange={handleChange} />
-            <input type="text" name="birthday" placeholder="Ngày tháng năm sinh (DD/MM/YYYY)" className="w-full p-2 border rounded" onChange={handleChange} />
+            <input type="text" name="dayofBirth" placeholder="Ngày tháng năm sinh (DD/MM/YYYY)" className="w-full p-2 border rounded" onChange={handleChange} />
             <div className="flex gap-2">
               <input type="text" name="address" placeholder="Địa chỉ" className="flex-1 p-2 border rounded" onChange={handleChange} />
 

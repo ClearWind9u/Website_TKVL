@@ -52,7 +52,8 @@ const createPost = async (req, res) => {
             salary,
             address,
             user_id: req.user._id,
-            category
+            category,
+            companyName: req.user.userName,
         });
         await newPost.save();
         res.status(201).json({ success: true, message: "Post created successfully", post: newPost });
