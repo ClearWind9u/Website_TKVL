@@ -84,25 +84,33 @@ const Profile = () => {
   };
 
   // Xử lý xóa CV
-  const handleDeleteCV = async (cvId) => {
+  // const handleDeleteCV = async (cvId) => {
+  //   try {
+  //     const response = await axios.delete(
+  //       `http://localhost:5000/jobseeker/info/deleteCV/${cvId}`,
+  //       { withCredentials: true }
+  //     );
+  //     // Cập nhật lại profile sau khi xóa
+  //     setProfile((prevProfile) => ({
+  //       ...prevProfile,
+  //       CVProfile: prevProfile.CVProfile.filter((cv) => cv.id !== cvId),
+  //     }));
+  //     alert("Xóa CV thành công!");
+  //     navigate("/recruiter");
+  //   } catch (error) {
+  //     setUploadError("Có lỗi xảy ra khi xóa CV. Vui lòng thử lại.");
+  //     console.error(error);
+  //   }
+  // };
+  const handleDeleteCV = (cvId) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:5000/jobseeker/info/deleteCV/${cvId}`,
-        { withCredentials: true }
-      );
-      // Cập nhật lại profile sau khi xóa
-      setProfile((prevProfile) => ({
-        ...prevProfile,
-        CVProfile: prevProfile.CVProfile.filter((cv) => cv.id !== cvId),
-      }));
+      setCVProfile((prevCVs) => prevCVs.filter((cv) => cv._id !== cvId));
       alert("Xóa CV thành công!");
-      navigate("/recruiter");
     } catch (error) {
-      setUploadError("Có lỗi xảy ra khi xóa CV. Vui lòng thử lại.");
       console.error(error);
+      setUploadError("Có lỗi xảy ra khi xóa CV.");
     }
-  };
-  console.log(userInfo);
+  };    
 
   return (
     <div className="flex flex-col w-full items-center text-[#3C3C3C] border-[#00000000] gap-10 mb-3">
