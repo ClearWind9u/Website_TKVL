@@ -9,27 +9,10 @@ const {
   viewPostsByCategory,
   applyForJob,
   editProfile,
+  viewAllJobAppications
 } = require("../../controllers/jobseeker");
 const { uploadCloud } = require("../../config/uploadCloud.js");
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, 'uploads/cvs/');
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, `${Date.now()}-${file.originalname}`);
-//     }
-// });
-// const upload = multer({
-//     storage,
-//     limits: { fileSize: 20 * 1024 * 1024 },
-//     fileFilter: (req, file, cb) => {
-//         const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-//         if (!allowedTypes.includes(file.mimetype)) {
-//             return cb(new Error('Only .pdf, .doc, and .docx format allowed!'), false);
-//         }
-//         cb(null, true);
-//     }
-// });
+
 router.post("/deleteAccount", authenticateMiddleware, deleteAccount);
 router.get("/viewUser/:id", authenticateMiddleware, viewUser);
 router.get("/viewAllPosts", authenticateMiddleware, viewAllPosts);
@@ -55,4 +38,9 @@ router.post(
 
 router.post("/editProfile", authenticateMiddleware, editProfile);
 router.get("/viewPost/:id", authenticateMiddleware, viewPostById);
+router.get(
+  "/viewAllJobApplications",
+  authenticateMiddleware,
+  viewAllJobAppications
+);
 module.exports = router;
