@@ -56,7 +56,8 @@ const Profile = () => {
       return;
     }
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    formData.append("cv", selectedFile);
+    // console.log(formData.get("cv"));
     handleUploadSuccess(formData);
   };
   const handleUploadSuccess = async (formData) => {
@@ -65,16 +66,15 @@ const Profile = () => {
   
       const response = await axios.post(
         "http://localhost:5000/jobseeker/addCV",
-        {formData},
+        formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data", // Đảm bảo axios nhận dạng đúng định dạng
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
-  
-      if (response.data.success === "OK") {
+      if (response.statusText === "OK") {
         setCVProfile(response.data.CVs);
         alert("Thêm CV thành công!");
       } else {
@@ -155,15 +155,14 @@ const Profile = () => {
           }
         );
         if (response.statusText === "OK") {
-          console.log(response.data.data)
           setCVProfile(response.data.data)
         }
       } catch (err) {
-        setError(err.response?.data?.message || "Đăng nhập thất bại!");
+        setError(err.response?.data?.message || "Truy cập dữ liệu thất bại!");
       }
     };
     fecthCV();
-  },[])
+  },[CVProfile]);
   
     // try {
     //   setCVProfile((prevCVs) => prevCVs.filter((cv) => cv._id !== cvId));
@@ -175,11 +174,15 @@ const Profile = () => {
     const handleDeleteCV = async (cvId) => {
       try {
         const token = localStorage.getItem("TOKEN");
-        const response = await axios.delete(`http://localhost:5000/jobseeker/removeCV`,{
+        const response = await axios.post(`http://localhost:5000/jobseeker/removeCV`,{
           cvId: cvId
         }, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { "Authorization": `Bearer ${token}` },
         });
+        // const response = await axios.post(`http://localhost:5000/jobseeker/removeCV`, 
+        //   headers: { Authorization: `Bearer ${token}` },
+        //   data: { cvId: cvId }, 
+        // );
         if (response.success === "OK") {
           setCVProfile(response.data.CVs);
           alert("Xóa CV thành công!");
