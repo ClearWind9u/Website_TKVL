@@ -22,7 +22,7 @@ const NavBar = () => {
   const handleLogout = () => {
     setIsDropdownVisible(false);
     logout();
-    navigate('/login');
+    navigate('/');
   };
   const handleBellClick = () => {
     setIsOpen(!isOpen);
