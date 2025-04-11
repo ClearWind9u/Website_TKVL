@@ -110,7 +110,7 @@ const Profile = () => {
       console.error(error);
       setUploadError("Có lỗi xảy ra khi xóa CV.");
     }
-  };    
+  };   
 
   return (
     <div className="flex flex-col w-full items-center text-[#3C3C3C] border-[#00000000] gap-10 mb-3">
