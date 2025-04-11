@@ -35,81 +35,40 @@
 
         <h2 class="mt-4">3. API Endpoints</h2>
 
-        <div class="accordion" id="apiAccordion">
-            <!-- Đăng ký -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#registerAPI">
-                        3.1. Đăng ký tài khoản (POST /auth/register)
-                    </button>
-                </h2>
-                <div id="registerAPI" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        <pre><code>{
-    "userName": "JohnDoe",
-    "email": "johndoe@example.com",
-    "password": "123456",
-    "role": "user"
-}</code></pre>
-                        <p><strong>Response (201):</strong></p>
-                        <pre><code>{
+<div class="accordion" id="apiAccordion">
+    <!-- Xóa tài khoản - Recruiter -->
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#deleteAccountAPI">
+                3.1. Xóa tài khoản (POST /recruiter/deleteAccount)
+            </button>
+        </h2>
+        <div id="deleteAccountAPI" class="accordion-collapse collapse">
+            <div class="accordion-body">
+                <p><strong>Headers:</strong></p>
+                <pre><code>Authorization: Bearer &lt;your_token_here&gt;</code></pre>
+                <p><strong>Request Body:</strong></p>
+                <pre><code>{}</code></pre>
+                <p><strong>Response (200):</strong></p>
+                <pre><code>{
     "success": true,
-    "message": "User registered successfully",
-    "token": "eyJhbGciOiJIUz..."
+    "message": "Account deleted successfully"
 }</code></pre>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Đăng nhập -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#loginAPI">
-                        3.2. Đăng nhập (POST /auth/login)
-                    </button>
-                </h2>
-                <div id="loginAPI" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        <pre><code>{
-    "email": "johndoe@example.com",
-    "password": "123456"
+                <p><strong>Response (500 - Error):</strong></p>
+                <pre><code>{
+    "success": false,
+    "message": "Error message"
 }</code></pre>
-                        <p><strong>Response (200):</strong></p>
-                        <pre><code>{
-    "success": true,
-    "token": "eyJhbGciOiJIUz..."
-}</code></pre>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Lấy danh sách người dùng -->
-            <div class="accordion-item">
-                <h2 class="accordion-header">
-                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#getUsersAPI">
-                        3.3. Lấy danh sách người dùng (GET /admin/users)
-                    </button>
-                </h2>
-                <div id="getUsersAPI" class="accordion-collapse collapse">
-                    <div class="accordion-body">
-                        <p><strong>Headers:</strong></p>
-                        <pre><code>Authorization: Bearer &lt;your_token_here&gt;</code></pre>
-                        <p><strong>Response (200):</strong></p>
-                        <pre><code>{
-    "success": true,
-    "data": [
-        {
-            "id": "650d1b5e1c4a2b001c5b9a00",
-            "userName": "John Doe",
-            "email": "johndoe@example.com",
-            "role": "admin"
-        }
-    ]
-}</code></pre>
-                    </div>
-                </div>
+                <p><strong>Notes:</strong></p>
+                <ul>
+                    <li>Chỉ những "recruiter" đã đăng nhập mới có thể xóa tài khoản của họ.</li>
+                    <li>API yêu cầu xác thực thông qua JWT Token trong phần header "Authorization".</li>
+                </ul>
             </div>
         </div>
+    </div>
+</div>
+
 
         <h2 class="mt-4">4. Lỗi Thường Gặp</h2>
         <table class="table table-bordered">
@@ -143,9 +102,6 @@
             </tbody>
         </table>
 
-        <h2 class="mt-4">5. Liên hệ & Hỗ trợ</h2>
-        <p>📧 Email: <a href="mailto:your_email@example.com">your_email@example.com</a></p>
-        <p>📞 Số điện thoại: +84 123 456 789</p>
 
     </div>
 

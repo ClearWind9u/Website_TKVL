@@ -9,27 +9,13 @@ const {
   viewPostsByCategory,
   applyForJob,
   editProfile,
+  viewAllJobAppications,
+  addCV,
+  removeSpecificCV,
+  getAllCV,
 } = require("../../controllers/jobseeker");
 const { uploadCloud } = require("../../config/uploadCloud.js");
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//         cb(null, 'uploads/cvs/');
-//     },
-//     filename: (req, file, cb) => {
-//         cb(null, `${Date.now()}-${file.originalname}`);
-//     }
-// });
-// const upload = multer({
-//     storage,
-//     limits: { fileSize: 20 * 1024 * 1024 },
-//     fileFilter: (req, file, cb) => {
-//         const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
-//         if (!allowedTypes.includes(file.mimetype)) {
-//             return cb(new Error('Only .pdf, .doc, and .docx format allowed!'), false);
-//         }
-//         cb(null, true);
-//     }
-// });
+
 router.post("/deleteAccount", authenticateMiddleware, deleteAccount);
 router.get("/viewUser/:id", authenticateMiddleware, viewUser);
 router.get("/viewAllPosts", authenticateMiddleware, viewAllPosts);
@@ -55,4 +41,25 @@ router.post(
 
 router.post("/editProfile", authenticateMiddleware, editProfile);
 router.get("/viewPost/:id", authenticateMiddleware, viewPostById);
+router.get(
+  "/viewAllJobApplications",
+  authenticateMiddleware,
+  viewAllJobAppications
+);
+router.get("/getAllCV", authenticateMiddleware, getAllCV);
+router.post(
+  "/addCV",
+  authenticateMiddleware,
+  (req, res, next) => {
+    uploadCloud.single("cv")(req, res, (err) => {
+      if (err) {
+        console.error("Multer error:", err.message);
+        return res.status(400).json({ success: false, message: err.message });
+      }
+      next();
+    });
+  },
+  addCV
+);
+router.post("/removeCV", authenticateMiddleware, removeSpecificCV);
 module.exports = router;

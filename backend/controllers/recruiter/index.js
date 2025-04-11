@@ -206,6 +206,69 @@ const viewPostById = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+const viewOwnPost = async (req, res) => {
+  try {
+    const recruiterId = req.user._id;
+    const posts = await Post.find({ user_id: recruiterId });
+    if (!posts)
+      return res
+        .status(404)
+        .json({ success: false, message: "No posts found for this user" });
+    res.status(200).json({ success: true, posts: posts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+const viewAllJobAppicationsByPostId = async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const applications = await JobApplication.find({ job_id: postId });
+    if (!applications || applications.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No applications found for this post" });
+    }
+    res.status(200).json({ success: true, data: applications });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+const rejectApplication = async (req, res) => {
+  try {
+    const applicationId = req.params.id;
+    const application = await JobApplication.findByIdAndUpdate(
+      applicationId,
+      { status: "rejected" },
+      { new: true }
+    );
+    if (!application) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Application not found" });
+    }
+    res.status(200).json({ success: true, data: application });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+const acceptApplication = async (req, res) => {
+  try {
+    const applicationId = req.params.id;
+    const application = await JobApplication.findByIdAndUpdate(
+      applicationId,
+      { status: "accepted" },
+      { new: true }
+    );
+    if (!application) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Application not found" });
+    }
+    res.status(200).json({ success: true, data: application });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 module.exports = {
   viewPostById,
   deleteAccount,
@@ -218,4 +281,8 @@ module.exports = {
   deletePost,
   editPost,
   editProfile,
+  viewOwnPost,
+  viewAllJobAppicationsByPostId,
+  rejectApplication,
+  acceptApplication
 };
