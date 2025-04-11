@@ -15,21 +15,6 @@ import { FaUsers } from "react-icons/fa";
 import { FaFlag } from "react-icons/fa";
 import axios from "axios";
 
-var listCV = [
-  {
-    _id: 1,
-    name: "Frontend CV",
-  },
-  {
-    _id: 2,
-    name: "Backend CV",
-  },
-  {
-    _id: 3,
-    name: "AI CV",
-  },
-]
-
 const CompDetail = () => {
   const [isReportOpen, setIsReportOpen] = useState(false); // Trạng thái mở/đóng modal báo cáo
   const [selectedReason, setSelectedReason] = useState(""); // Lý do báo cáo
@@ -40,13 +25,25 @@ const CompDetail = () => {
   const [jobRandom, setJobRamdom] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isApplicationsModalOpen, setIsApplicationsModalOpen] = useState(false);
+  const [applications, setApplications] = useState([]);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+  const [applicationsError, setApplicationsError] = useState(null);
   const [isCVModalOpen, setIsCVModalOpen] = useState(false); // Trạng thái mở/đóng modal chọn CV
-  const [cvList, setCVList] = useState(listCV); // Danh sách CV của người dùng
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [cvList, setCVList] = useState([]); // Danh sách CV của người dùng
   const [selectedCVId, setSelectedCVId] = useState(null); // ID của CV được chọn
-  //const { userInfo, token } = useContext(UserContext);
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const token = localStorage.getItem("TOKEN");
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    postId: "",
+    title: "",
+    content: "",
+    salary: "",
+    address: "",
+    category: [],
+  });
   const handleReportClick = () => {
     setIsReportOpen(true); // Mở modal báo cáo
   };
@@ -83,18 +80,23 @@ const CompDetail = () => {
         const randomJobs = allJobs.sort(() => Math.random() - 0.5).slice(0, 7);
 
         setJobRamdom(randomJobs);
-        // const cvResponse = await axios.get(`http://localhost:5000/jobseeker/info/CV`, {
-        //   withCredentials: true,
-        // });
-        // setCVList(cvResponse.data.CVProfile.data);
+        if (userInfo?.role === "jobseeker") {
+          const cvResponse = await axios.get(
+            "http://localhost:5000/jobseeker/getAllCV",
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setCVList(cvResponse.data.data || []); // Use data field from response
+        }
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.message || err.message);
       } finally {
         setLoading(false);
       }
     };
     fetchJobDetail();
-  }, [id]);
+  }, [id, userInfo?.role, token]);
 
   useEffect(() => {
     console.log("Job Detail:", jobDetail);
@@ -105,33 +107,35 @@ const CompDetail = () => {
   };
 
   const handleSubmitCV = async () => {
-    if (!selectedCVId) {
+    if (!selectedCV) {
       alert("Vui lòng chọn một CV để nộp.");
       return;
     }
-    if (selectedCVId) {
-      alert("Nộp CV thành công.");
-      handleCloseCVModal();
-      return;
-    }
     try {
+      const formData = new FormData();
+      formData.append("job_id", id);
+      formData.append("job_name", jobDetail.post.title);
+      formData.append("cv", selectedCV); // URL or File object
+
       const response = await axios.post(
-        `http://localhost:5000/jobseeker/${id}/submitCV`,
+        "http://localhost:5000/jobseeker/applyForJob",
+        formData,
         {
-          CVID: selectedCVId,
-        },
-        {
-          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
       );
       if (response.data.success) {
         alert("Nộp CV thành công!");
         setIsCVModalOpen(false);
+        setSelectedCV(null);
       } else {
         alert(`Lỗi: ${response.data.message}`);
       }
     } catch (err) {
-      alert(`Lỗi khi nộp CV: ${err.message}`);
+      alert(`Lỗi khi nộp CV: ${err.response?.data?.message || err.message}`);
     }
   };
 
@@ -139,34 +143,102 @@ const CompDetail = () => {
     setIsCVModalOpen(false);
     setSelectedCVId(null);
   };
-  const handleEditClick = () => {
-    console.log("Sửa clicked");
-    alert("Chức năng sửa sẽ được triển khai!");
+  const handleEditClick = (post) => {
+    setFormData({
+      postId: post._id,
+      title: post.title,
+      content: post.content,
+      salary: post.salary,
+      address: post.address,
+      category: post.category || [],
+    });
+    setIsEditModalOpen(true);
   };
 
-  const handleDeleteClick = async (jobId) => {
+  const handleEditSubmit = async () => {
+    try {
+      const response = await axios.post(
+        "http://localhost:5000/recruiter/editPost",
+        formData,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      alert("Bài đăng đã được cập nhật thành công!");
+      setIsEditModalOpen(false);
+      navigate("/recruiter"); // Or refresh the current page
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!";
+      alert(errorMessage);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "category" ? value.split(",") : value,
+    }));
+  };
+
+  const handleDeleteClick = async (postId) => {
     const confirmDelete = window.confirm("Bạn có chắc muốn xóa mục này?");
 
     if (confirmDelete) {
       try {
-        const response = await axios.delete(`http://localhost:5000/recruiter/${jobId}/delete`, {
-          withCredentials: true,
-        });
+        const response = await axios.post(
+          `http://localhost:5000/recruiter/deletePost`,
+          { postId },
+          { headers: { Authorization: `Bearer ${token}` }, });
 
         alert("Mục đã được xóa thành công!");
         navigate("/recruiter");
       } catch (error) {
-        alert("Có lỗi xảy ra, vui lòng thử lại!");
+        const errorMessage = error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!";
+        alert(errorMessage);
       }
     }
   };
 
-  const handleViewCandidatesClick = () => {
-    if (id) {
-      navigate(`/recruiter/jobDetail/${id}/listJobseeker`);
-    } else {
+  const handleViewCandidatesClick = async () => {
+    if (!id) {
       alert("ID của bài viết không tồn tại!");
+      return;
     }
+    setIsApplicationsModalOpen(true);
+    setLoadingApplications(true);
+    setApplicationsError(null);
+    try {
+      if (!token) {
+        throw new Error("Vui lòng đăng nhập lại!");
+      }
+      const response = await axios.get(
+        `http://localhost:5000/recruiter/viewAllJobAppicationsByPostId/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setApplications(response.data.data);
+      setLoadingApplications(false);
+    } catch (error) {
+      console.log(error);
+      setApplicationsError(
+        error.response?.data?.message || "Có lỗi xảy ra khi tải danh sách ứng viên!"
+      );
+      setLoadingApplications(false);
+    }
+  };
+
+  const handleCloseApplicationsModal = () => {
+    setIsApplicationsModalOpen(false);
+    setApplications([]);
+    setApplicationsError(null);
   };
 
   if (loading) return <div>Đang tải...</div>;
@@ -254,9 +326,9 @@ const CompDetail = () => {
           </div>
 
           <div className="ButtonDiv flex gap-5 m-4">
-            {userInfo?.role === 'jobseeker' ? (
+            {userInfo?.role === "jobseeker" ? (
               <>
-                {/* Nút Ứng tuyển ngay */}
+                {/* Existing jobseeker buttons */}
                 <button
                   className="bg-blue-500 text-white py-2 px-6 rounded-[20px] hover:bg-blue-700 w-2/3"
                   onClick={handleApplyClick}
@@ -265,74 +337,31 @@ const CompDetail = () => {
                     Ứng tuyển ngay
                   </span>
                 </button>
-
-                {/* Modal chọn CV */}
-                {isCVModalOpen && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white w-[90%] md:w-[500px] p-6 rounded-[20px] shadow-lg">
-                      <h2 className="text-xl font-semibold mb-4">Chọn CV để ứng tuyển</h2>
-
-                      <div className="mb-4">
-                        {cvList.length > 0 ? (
-                          <ul className="space-y-2">
-                            {cvList.map((cv, index) => (
-                              <li key={cv._id} className="flex items-center gap-4">
-                                <input
-                                  type="radio"
-                                  name="cv"
-                                  value={cv._id}
-                                  onChange={() => setSelectedCVId(cv._id)}
-                                />
-                                <span>{cv.name}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-gray-500">Bạn chưa có CV nào.</p>
-                        )}
-                      </div>
-
-                      <div className="flex justify-end gap-3">
-                        <button
-                          className="py-2 px-4 bg-gray-300 rounded hover:bg-gray-400"
-                          onClick={handleCloseCVModal}
-                        >
-                          Hủy
-                        </button>
-                        <button
-                          className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
-                          onClick={handleSubmitCV}
-                        >
-                          Nộp CV
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Nút "Yêu thích" */}
                 <button className="border-2 border-black py-2 px-4 rounded-[20px] hover:text-white hover:bg-black w-1/3">
                   <span className="block transition-transform duration-150 hover:scale-110">
                     Yêu thích
                   </span>
                 </button>
               </>
-            ) : userInfo?.role === 'recruiter' ? (
+            ) : userInfo?.role === "recruiter" ? (
               <>
-                {/* Nút sửa */}
+                {/* Sửa button */}
                 <button
                   className="bg-yellow-500 text-white py-2 px-10 rounded-[20px] hover:bg-yellow-600"
-                  onClick={handleEditClick}
+                  onClick={() => handleEditClick(jobDetail.post)}
                 >
                   Sửa
                 </button>
 
-                {/* Nút xóa */}
-                <button onClick={() => handleDeleteClick(id)} className="bg-red-500 text-white py-2 px-10 rounded-[20px] hover:bg-red-600">
+                {/* Xóa button */}
+                <button
+                  onClick={() => handleDeleteClick(jobDetail.post._id)}
+                  className="bg-red-500 text-white py-2 px-10 rounded-[20px] hover:bg-red-600"
+                >
                   Xóa
                 </button>
 
-                {/* Nút danh sách ứng viên */}
+                {/* Danh sách ứng viên button */}
                 <button
                   className="bg-green-500 text-white py-2 px-10 rounded-[20px] hover:bg-green-600"
                   onClick={handleViewCandidatesClick}
@@ -343,6 +372,184 @@ const CompDetail = () => {
             ) : null}
           </div>
 
+          {/* CV Modal for Jobseekers */}
+          {isCVModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white w-[90%] md:w-[500px] p-6 rounded-[20px] shadow-lg">
+                <h2 className="text-xl font-semibold mb-4">Chọn CV để nộp</h2>
+                {cvList.length === 0 ? (
+                  <p className="text-center">Bạn chưa có CV nào.</p>
+                ) : (
+                  <div className="max-h-[300px] overflow-y-auto">
+                    {cvList.map((cv) => (
+                      <div
+                        key={cv._id}
+                        className="p-2 mb-2 border border-gray-300 rounded cursor-pointer hover:bg-gray-100"
+                        onClick={() => setSelectedCV(cv.url)} // Assuming CV has a url field
+                      >
+                        <p>{cv.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="mt-4">
+                  <label className="block text-sm font-medium mb-2">Hoặc tải lên CV mới:</label>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.png"
+                    onChange={(e) => setSelectedCV(e.target.files[0])}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
+                  />
+                </div>
+                <div className="flex justify-end gap-3 mt-4">
+                  <button
+                    className="py-2 px-4 bg-gray-300 rounded hover:bg-gray-400"
+                    onClick={handleCloseCVModal}
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    onClick={handleSubmitCV}
+                  >
+                    Nộp CV
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Edit Modal */}
+          {isEditModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white w-[90%] md:w-[600px] p-6 rounded-[20px] shadow-lg">
+                <h2 className="text-xl font-semibold mb-4">Chỉnh sửa bài đăng</h2>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Tiêu đề</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded"
+                    placeholder="Nhập tiêu đề"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Mô tả công việc</label>
+                  <textarea
+                    name="content"
+                    value={formData.content}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded"
+                    rows="4"
+                    placeholder="Nhập mô tả công việc"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Mức lương</label>
+                  <input
+                    type="text"
+                    name="salary"
+                    value={formData.salary}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded"
+                    placeholder="Nhập mức lương"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Địa điểm</label>
+                  <input
+                    type="text"
+                    name="address"
+                    value={formData.address}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded"
+                    placeholder="Nhập địa điểm"
+                  />
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">Danh mục</label>
+                  <input
+                    type="text"
+                    name="category"
+                    value={formData.category.join(",")}
+                    onChange={handleInputChange}
+                    className="w-full p-2 border border-gray-300 rounded"
+                    placeholder="Nhập danh mục, cách nhau bằng dấu phẩy"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    className="py-2 px-4 bg-gray-300 rounded hover:bg-gray-400"
+                    onClick={handleCloseEditModal}
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    onClick={handleEditSubmit}
+                  >
+                    Lưu
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+          {isApplicationsModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white w-[90%] md:w-[700px] p-6 rounded-[20px] shadow-lg">
+                <h2 className="text-xl font-semibold mb-4">Danh sách ứng viên</h2>
+                {loadingApplications ? (
+                  <p className="text-center">Đang tải...</p>
+                ) : applicationsError ? (
+                  <p className="text-red-500 text-center">{applicationsError}</p>
+                ) : applications.length === 0 ? (
+                  <p className="text-center">Chưa có ứng viên nào cho bài đăng này.</p>
+                ) : (
+                  <div className="max-h-[400px] overflow-y-auto">
+                    {applications.map((app) => (
+                      <div
+                        key={app._id}
+                        className="p-4 mb-2 border border-gray-300 rounded-[10px]"
+                      >
+                        <p><strong>Tên ứng viên:</strong> {app.user_id?.name || "N/A"}</p>
+                        <p><strong>Email:</strong> {app.user_id?.email || "N/A"}</p>
+                        <p>
+                          <strong>CV:</strong>{" "}
+                          {app.cv_url ? (
+                            <a href={app.cv_url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                              Xem CV
+                            </a>
+                          ) : (
+                            "Không có CV"
+                          )}
+                        </p>
+                        <p>
+                          <strong>Ngày ứng tuyển:</strong>{" "}
+                          {new Date(app.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="flex justify-end gap-3 mt-4">
+                  <button
+                    className="py-2 px-4 bg-gray-300 rounded hover:bg-gray-400"
+                    onClick={handleCloseApplicationsModal}
+                  >
+                    Đóng
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="Chitiettuyendung text-xl font-bold flex justify-between items-center ml-4 mt-5">
             Chi tiết tuyển dụng
           </div>
@@ -406,9 +613,6 @@ const CompDetail = () => {
               ))}
             </div>
           </div>
-
-
-
         </div>
         <div className="p-[10px] border-[2px] border-black rounded-[20px] h-fit ">
           <div className="w-[100px] h-[100px] mx-auto rounded-full border border-black flex items-center justify-center">
@@ -444,167 +648,6 @@ const CompDetail = () => {
             </div>
           </div>
         </div>
-        {/* <div className="p-6 bg-white border border-black rounded-[20px] shadow-md text-center h-fit w-[400px] relative">
-            <button
-              onClick={handleReportClick}
-              className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition"
-            >
-              <FaFlag className="text-2xl" />
-            </button>
-
-            <div className="nameDiv">
-              <div className="w-[100px] h-[100px] mx-auto rounded-full border border-black flex items-center justify-center">
-                <img
-                  src="/vng.logo.png"
-                  alt="Company Logo"
-                  className="w-[80%] h-[80%] object-contain"
-                />
-              </div>
-              <h2 className="text-xl font-semibold mt-4">Công ty TNHH Một Mình Anh</h2>
-              <div className="text-left mt-6">
-                <div className="flex items-center gap-2 mb-3">
-                  <BiGridAlt className="text-gray-500 text-lg" />
-                  <span className="text-lg font-bold">Lĩnh vực: <span className="font-medium">Công nghệ thông tin</span></span>
-                </div>
-              </div>
-
-              <div className="LocationDiv flex flex-col gap-4 p-4">
-                <div className="flex items-center text-xl ml-4 font-bold">
-                  <IoMdTime className="ml-2 text-gray-500 text-lg mr-2" />
-                  <span>Thời gian làm việc</span>
-                </div>
-
-                <div className="flex-col gap-1 ml-10">
-                  <div className="flex items-start">
-                    <span className="text-xl font-bold text-black mr-2">•</span>
-                    <span>Bất cứ khi nào em muốn</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {(userInfo?.role === 'Jobseeker' || 'Recruiter') ? (
-              <div className="relative p-6 bg-white border border-black rounded-[20px] shadow-md text-center h-fit w-[400px]">
-              
-                <button
-                  onClick={handleReportClick}
-                  className="absolute top-3 right-3 text-red-500 hover:text-red-700 transition"
-                >
-                  <FaFlag className="text-2xl" />
-                </button>
-
-                <div className="nameDiv">
-                  <div className="w-[100px] h-[100px] mx-auto rounded-full border border-black flex items-center justify-center">
-                    <img
-                      src="/vng.logo.png"
-                      alt="Company Logo"
-                      className="w-[80%] h-[80%] object-contain"
-                    />
-                  </div>
-                  <h2 className="text-xl font-semibold mt-4">
-                    Công ty TNHH Một Mình Anh
-                  </h2>
-                  <div className="text-left mt-6">
-                    <div className="flex items-center gap-2 mb-3">
-                      <BiGridAlt className="text-gray-500 text-lg" />
-                      <span className="text-lg font-bold">
-                        Lĩnh vực:{" "}
-                        <span className="font-medium">Công nghệ thông tin</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <FaUsers className="text-gray-500 text-lg" />
-                      <span className="text-lg font-bold">
-                        Quy mô: <span className="font-medium">1000 nhân viên</span>
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <IoLocationOutline className="text-gray-500 text-lg" />
-                      <span className="text-lg font-bold">
-                        Địa điểm:{" "}
-                        <span className="font-medium">268 Lý Thường Kiệt Quận 10</span>
-                      </span>
-                    </div>
-                  </div>
-                  <button className="mt-6 py-2 px-6 border-2 border-black rounded-[20px] hover:bg-black hover:text-white transition duration-200">
-                    Xem trang công ty
-                  </button>
-                </div>
-
-                {isReportOpen && (
-                  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                    <div className="bg-white w-[90%] md:w-[500px] p-6 rounded-[20px] shadow-lg">
-                      <h2 className="text-xl font-semibold mb-4">Báo cáo công ty</h2>
-
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium mb-2">
-                          Lý do báo cáo:
-                        </label>
-                        <select
-                          className="w-full p-2 border border-gray-300 rounded"
-                          value={selectedReason}
-                          onChange={(e) => setSelectedReason(e.target.value)}
-                        >
-                          <option value="">-- Chọn lý do --</option>
-                          <option value="Lừa đảo">Lừa đảo</option>
-                          <option value="Thông tin không đúng sự thật">
-                            Thông tin không đúng sự thật
-                          </option>
-                          <option value="Khác">Khác (vui lòng ghi rõ)</option>
-                        </select>
-                      </div>
-
-                      {selectedReason === "Khác" && (
-                        <div className="mb-4">
-                          <label className="block text-sm font-medium mb-2">
-                            Vui lòng ghi rõ:
-                          </label>
-                          <textarea
-                            className="w-full p-2 border border-gray-300 rounded"
-                            rows="2"
-                            value={otherReason}
-                            onChange={(e) => setOtherReason(e.target.value)}
-                            placeholder="Nhập lý do khác..."
-                          ></textarea>
-                        </div>
-                      )}
-
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium mb-2">
-                          Minh chứng:
-                        </label>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-gray-200 file:text-gray-700 hover:file:bg-gray-300"
-                          onChange={handleFileUpload}
-                        />
-                        {evidence && (
-                          <p className="mt-2 text-sm text-gray-600">
-                            File: {evidence.name}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="flex justify-end gap-3">
-                        <button
-                          className="py-2 px-4 bg-gray-300 rounded hover:bg-gray-400"
-                          onClick={handleCloseModal}
-                        >
-                          Hủy
-                        </button>
-                        <button
-                          className="py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600"
-                          onClick={handleSubmitReport}
-                        >
-                          Gửi báo cáo
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : null}
-          </div> */}
       </div>
     </div>
   );
