@@ -1,8 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+const temp = [
+  {
+    title: "Frontend Developer tại ABC Corp",
+    cvName: "Frontend CV.pdf",
+    cvStatus: "Đã nộp",
+  },
+  {
+    title: "Backend Developer tại XYZ Ltd",
+    cvName: "Backend Cv.pdf",
+    cvStatus: "Đang xét duyệt",
+  },
+  {
+    title: "Fullstack Intern tại DevTech",
+    cvName: "Frontend CV.pdf",
+    cvStatus: "Từ chối",
+  }
+];
 
 const State = () => {
-  const [appliedArticles, setAppliedArticles] = useState([]);
+  const [appliedArticles, setAppliedArticles] = useState(temp); // Dữ liệu giả lập
   const [loading, setLoading] = useState(true); 
 
   const statusStates = [

@@ -2,7 +2,24 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 // import UserContext from "../userContext/userContext";
 import { useNavigate } from "react-router-dom";
-
+var CVProfile2= [
+  {
+    _id: "1",
+    name: "Frontend CV",
+    cvFile: {
+      contentType: "application/pdf",
+      data: "JVBERi0xLjQKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwvTGluZWFyaXplZCAxL0wgMTA4NjIvTyA2L0UgNjI4ODQvTiAyL1QgMTAyMzYvSCBbIDM3MSAxMDZdPj4KZW5kb2JqCj..."
+    }
+  },
+  {
+    _id: "2",
+    name: "Backend CV",
+    cvFile: {
+      contentType: "application/pdf",
+      data: "JVBERi0xLjUKJeLjz9MKMyAwIG9iago8PC9UeXBlIC9QYWdlL1BhcmVudCAxIDAgUi9SZXNvdXJjZXMgMiAwIFIvTWVkaWFCb3hbMCAwIDU5NSA4NDJdPj4KZW5kb2JqC..."
+    }
+  }
+]
 const Profile = () => {
   // const {userInfo} = useContext(UserContext);
   // const [profile, setProfile] = useState(profileLocal);
@@ -12,63 +29,88 @@ const Profile = () => {
   const [uploadError, setUploadError] = useState("");
   const [uploadSuccess, setUploadSuccess] = useState("");
   const navigate = useNavigate();
-
+  const [CVProfile, setCVProfile] = useState(CVProfile2);
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
-
+  const handleUploadSuccess = (newCV) => {
+    setCVProfile(prevList => [...prevList, newCV]);
+  };
+  
   const handleUpload = async () => {
     if (!selectedFile) {
       setUploadError("Vui lòng chọn một tệp CV để tải lên.");
       return;
     }
+    const reader = new FileReader();
+  reader.onloadend = () => {
+    const base64Data = reader.result.split(',')[1]; // bỏ phần data:xxx;base64,
+    const newCV = {
+      _id: Date.now().toString(), // ID tạm thời
+      name: selectedFile.name,
+      cvFile: {
+        contentType: selectedFile.type,
+        data: base64Data,
+      }
+    };
+    handleUploadSuccess(newCV); // thêm vào list
+  };
+  reader.readAsDataURL(selectedFile);
 
-    const formData = new FormData();
-    formData.append("cvFile", selectedFile);
-    formData.append("name", selectedFile.name);
+    // const formData = new FormData();
+    // formData.append("cvFile", selectedFile);
+    // formData.append("name", selectedFile.name);
 
-    try {
-      setUploadError("");
-      setUploadSuccess("");
-      const response = await axios.post(
-        "http://localhost:5000/jobseeker/info/uploadCV",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-          withCredentials: true,
-        }
-      );
-      setUploadSuccess("Tải lên CV thành công!");
-      setProfile((prevProfile) => ({
-        ...prevProfile,
-        CVProfile: [...(prevProfile.CVProfile || []), response.data.newCV],
-      }));
-    } catch (error) {
-      setUploadError("Có lỗi xảy ra khi tải lên CV. Vui lòng thử lại.");
-      console.error(error);
-    }
+    // try {
+    //   setUploadError("");
+    //   setUploadSuccess("");
+    //   const response = await axios.post(
+    //     "http://localhost:5000/jobseeker/info/uploadCV",
+    //     formData,
+    //     {
+    //       headers: { "Content-Type": "multipart/form-data" },
+    //       withCredentials: true,
+    //     }
+    //   );
+    //   setUploadSuccess("Tải lên CV thành công!");
+    //   setProfile((prevProfile) => ({
+    //     ...prevProfile,
+    //     CVProfile: [...(prevProfile.CVProfile || []), response.data.newCV],
+    //   }));
+    // } catch (error) {
+    //   setUploadError("Có lỗi xảy ra khi tải lên CV. Vui lòng thử lại.");
+    //   console.error(error);
+    // }
   };
 
   // Xử lý xóa CV
-  const handleDeleteCV = async (cvId) => {
+  // const handleDeleteCV = async (cvId) => {
+  //   try {
+  //     const response = await axios.delete(
+  //       `http://localhost:5000/jobseeker/info/deleteCV/${cvId}`,
+  //       { withCredentials: true }
+  //     );
+  //     // Cập nhật lại profile sau khi xóa
+  //     setProfile((prevProfile) => ({
+  //       ...prevProfile,
+  //       CVProfile: prevProfile.CVProfile.filter((cv) => cv.id !== cvId),
+  //     }));
+  //     alert("Xóa CV thành công!");
+  //     navigate("/recruiter");
+  //   } catch (error) {
+  //     setUploadError("Có lỗi xảy ra khi xóa CV. Vui lòng thử lại.");
+  //     console.error(error);
+  //   }
+  // };
+  const handleDeleteCV = (cvId) => {
     try {
-      const response = await axios.delete(
-        `http://localhost:5000/jobseeker/info/deleteCV/${cvId}`,
-        { withCredentials: true }
-      );
-      // Cập nhật lại profile sau khi xóa
-      setProfile((prevProfile) => ({
-        ...prevProfile,
-        CVProfile: prevProfile.CVProfile.filter((cv) => cv.id !== cvId),
-      }));
+      setCVProfile((prevCVs) => prevCVs.filter((cv) => cv._id !== cvId));
       alert("Xóa CV thành công!");
-      navigate("/recruiter");
     } catch (error) {
-      setUploadError("Có lỗi xảy ra khi xóa CV. Vui lòng thử lại.");
       console.error(error);
+      setUploadError("Có lỗi xảy ra khi xóa CV.");
     }
-  };
-  console.log(userInfo);
+  };    
 
   return (
     <div className="flex flex-col w-full items-center text-[#3C3C3C] border-[#00000000] gap-10 mb-3">
@@ -104,8 +146,31 @@ const Profile = () => {
       {/* CV Profile */}
       <div className="flex flex-col w-[600px] gap-4">
         <h2 className="font-bold text-[20px]">Thông tin CV:</h2>
-        {userInfo.CVProfile && userInfo.CVProfile.length > 0 ? (
+        {/* {userInfo.CVProfile && userInfo.CVProfile.length > 0 ? (
           userInfo.CVProfile.map((cv, index) => (
+            <div key={index} className="flex flex-col gap-2 border p-4 rounded-md">
+              <p className="font-semibold">Tên CV: {cv?.name || "Chưa có tên CV"}</p>
+              <p className="font-semibold">ID: {cv?._id}</p>
+              <a
+                href={`data:${cv?.cvFile?.contentType};base64,${cv?.cvFile?.data}`}
+                download={`${cv?.name || "CV"}.pdf`}
+                className="text-blue-500 underline"
+              >
+                Tải xuống CV
+              </a>
+              <button
+                onClick={() => handleDeleteCV(cv._id)}
+                className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600"
+              >
+                Xóa CV
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>Chưa có CV nào được tải lên.</p>
+        )} */}
+        {CVProfile && CVProfile.length > 0 ? (
+          CVProfile.map((cv, index) => (
             <div key={index} className="flex flex-col gap-2 border p-4 rounded-md">
               {/* Hiển thị tên CV và id */}
               <p className="font-semibold">Tên CV: {cv?.name || "Chưa có tên CV"}</p>

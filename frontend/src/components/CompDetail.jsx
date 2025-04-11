@@ -15,6 +15,21 @@ import { FaUsers } from "react-icons/fa";
 import { FaFlag } from "react-icons/fa";
 import axios from "axios";
 
+var listCV = [
+  {
+    _id: 1,
+    name: "Frontend CV",
+  },
+  {
+    _id: 2,
+    name: "Backend CV",
+  },
+  {
+    _id: 3,
+    name: "AI CV",
+  },
+]
+
 const CompDetail = () => {
   const [isReportOpen, setIsReportOpen] = useState(false); // Trạng thái mở/đóng modal báo cáo
   const [selectedReason, setSelectedReason] = useState(""); // Lý do báo cáo
@@ -26,7 +41,7 @@ const CompDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isCVModalOpen, setIsCVModalOpen] = useState(false); // Trạng thái mở/đóng modal chọn CV
-  const [cvList, setCVList] = useState([]); // Danh sách CV của người dùng
+  const [cvList, setCVList] = useState(listCV); // Danh sách CV của người dùng
   const [selectedCVId, setSelectedCVId] = useState(null); // ID của CV được chọn
   //const { userInfo, token } = useContext(UserContext);
   const userInfo = JSON.parse(localStorage.getItem("USER"));
@@ -92,6 +107,11 @@ const CompDetail = () => {
   const handleSubmitCV = async () => {
     if (!selectedCVId) {
       alert("Vui lòng chọn một CV để nộp.");
+      return;
+    }
+    if (selectedCVId) {
+      alert("Nộp CV thành công.");
+      handleCloseCVModal();
       return;
     }
     try {
