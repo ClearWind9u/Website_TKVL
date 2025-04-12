@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Candidate = () => {
   const [items, setItems] = useState([]);
   const [inputValues, setInputValues] = useState({ name: "", cv: "" });
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCV, setSelectedCV] = useState(null);
-  const [selectedIndex, setSelectedIndex] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const token = localStorage.getItem("TOKEN");
+  const navigate = useNavigate();
 
-  // Fetch initial CVs from the backend
   useEffect(() => {
     const fetchCVs = async () => {
       try {
@@ -24,11 +22,12 @@ const Candidate = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        // Map backend data to frontend format
         const fetchedItems = response.data.data.map((app) => ({
-          _id: app._id, // Keep _id for backend actions
+          _id: app._id,
           name: app.applicant_id?.userName || "N/A",
           cv: app.cv,
+          job_id: app.job_id || null,
+          job_name: app.job_name || "N/A",
           status: app.status === "accepted"
             ? "Đã chấp nhận"
             : app.status === "rejected"
@@ -57,7 +56,6 @@ const Candidate = () => {
   const removeItem = async (index) => {
     const item = items[index];
     if (item._id) {
-      // API-fetched item, call deleteApplication
       try {
         if (!token) {
           throw new Error("Vui lòng đăng nhập lại!");
@@ -76,7 +74,6 @@ const Candidate = () => {
         );
       }
     } else {
-      // Locally added item, remove locally
       setItems(items.filter((_, i) => i !== index));
     }
   };
@@ -91,7 +88,6 @@ const Candidate = () => {
     const updatedItems = [...items];
     
     if (item._id) {
-      // API-fetched item, call backend endpoint
       try {
         if (!token) {
           throw new Error("Vui lòng đăng nhập lại!");
@@ -100,7 +96,6 @@ const Candidate = () => {
           newStatus === "Đồng ý"
             ? `/recruiter/acceptApplication/${item._id}`
             : `/recruiter/rejectApplication/${item._id}`;
-        const backendStatus = newStatus === "Đồng ý" ? "accepted" : "rejected";
         await axios.post(
           `http://localhost:5000${endpoint}`,
           {},
@@ -117,32 +112,31 @@ const Candidate = () => {
         );
       }
     } else {
-      // Locally added item, update locally
       updatedItems[index].status = newStatus;
       setItems(updatedItems);
     }
   };
 
   const handleViewCV = (index, cv) => {
-    setSelectedCV(cv);
-    setSelectedIndex(index);
-    setIsModalOpen(true);
-    // Update status to "Đã xem" only for local items or if not yet accepted/rejected
-    const updatedItems = [...items];
-    if (updatedItems[index].status === "Chưa xem") {
-      updatedItems[index].status = "Đã xem";
-      setItems(updatedItems);
+    if (cv) {
+      window.open(cv, "_blank"); // Open CV URL in new tab
+      const updatedItems = [...items];
+      if (updatedItems[index].status === "Chưa xem") {
+        updatedItems[index].status = "Đã xem";
+        setItems(updatedItems);
+      }
     }
   };
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedCV(null);
-    setSelectedIndex(null);
+  const handleJobClick = (job_id) => {
+    if (job_id) {
+      navigate(`/jobDetail/${job_id}`);
+    }
   };
 
   const columns = [
     { label: "Tên người ứng tuyển", key: "name" },
+    { label: "Công việc ứng tuyển", key: "job_name" },
     { label: "CV người ứng tuyển", key: "cv" },
     { label: "Trạng thái", key: "status" },
     { label: "Quyết định", key: "action" },
@@ -150,32 +144,8 @@ const Candidate = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-gray-100  shadow-md rounded-lg p-8 w-full max-w-7xl">
+      <div className="bg-gray-100 shadow-md rounded-lg p-8 w-full max-w-7xl">
         <h1 className="text-3xl font-bold mb-6 text-center">Danh Sách</h1>
-        {/* <div className="grid grid-cols-2 gap-6 mb-6">
-          <input
-            type="text"
-            name="name"
-            value={inputValues.name}
-            onChange={handleChange}
-            placeholder="Tên người ứng tuyển"
-            className="border border-gray-300 rounded-lg px-6 py-3 w-full text-lg focus:outline-none focus:ring focus:ring-blue-200"
-          />
-          <input
-            type="text"
-            name="cv"
-            value={inputValues.cv}
-            onChange={handleChange}
-            placeholder="Link file CV"
-            className="border border-gray-300 rounded-lg px-6 py-3 w-full text-lg focus:outline-none focus:ring focus:ring-blue-200"
-          />
-        </div>
-        <button
-          onClick={addItem}
-          className="mb-6 w-full bg-blue-600 text-white rounded-lg px-6 py-3 text-xl hover:bg-blue-700 transition"
-        >
-          Thêm Mục
-        </button> */}
         {loading ? (
           <p className="text-center text-lg">Đang tải...</p>
         ) : error ? (
@@ -198,7 +168,7 @@ const Candidate = () => {
             <tbody>
               {items.map((item, index) => (
                 <tr
-                  key={item._id || index} // Use _id for API items, index for local
+                  key={item._id || index}
                   className="odd:bg-gray-100 even:bg-white"
                 >
                   {columns.map((column) => (
@@ -206,7 +176,19 @@ const Candidate = () => {
                       key={column.key}
                       className="border border-gray-300 px-8 py-4 text-lg"
                     >
-                      {column.key === "cv" ? (
+                      {column.key === "job_name" ? (
+                        item.job_id ? (
+                          <button
+                            onClick={() => handleJobClick(item.job_id)}
+                            className="text-blue-600 hover:underline"
+                            title={item.job_name}
+                          >
+                            {item.job_name}
+                          </button>
+                        ) : (
+                          item.job_name
+                        )
+                      ) : column.key === "cv" ? (
                         <button
                           onClick={() => handleViewCV(index, item.cv)}
                           className="bg-blue-600 text-white px-6 py-3 rounded hover:bg-blue-700"
@@ -220,13 +202,13 @@ const Candidate = () => {
                           <>
                             <button
                               onClick={() => handleStatusChange(index, "Đồng ý")}
-                              className="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 ml-4"
+                              className="bg-green-600 text-white px-5 py-3 rounded hover:bg-green-700 ml-4"
                             >
                               Đồng ý
                             </button>
                             <button
                               onClick={() => handleStatusChange(index, "Từ chối")}
-                              className="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 ml-4"
+                              className="bg-red-600 text-white px-5 py-3 rounded hover:bg-red-700 ml-4"
                             >
                               Từ chối
                             </button>
@@ -251,31 +233,6 @@ const Candidate = () => {
           </table>
         )}
       </div>
-
-      {/* Modal to view CV */}
-      {isModalOpen && selectedCV && (
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg max-w-3xl max-h-full overflow-auto">
-            <button
-              onClick={closeModal}
-              className="text-red-600 font-bold text-xl mb-6 inline-block"
-            >
-              Đóng
-            </button>
-            <div>
-              {selectedCV.endsWith(".pdf") ? (
-                <iframe
-                  src={selectedCV}
-                  title="CV"
-                  className="w-full h-[500px]"
-                />
-              ) : (
-                <img src={selectedCV} alt="CV" className="w-full h-auto" />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

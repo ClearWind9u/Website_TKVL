@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // For redirecting jobseekers
 import Search from './Search';
 import { IoIosArrowDropleft, IoIosArrowDropright, IoIosArrowDropleftCircle, IoIosArrowDroprightCircle } from 'react-icons/io';
-import { SingleJob } from './JobHome'; // Import SingleJob từ JobHome
+import { SingleJob } from './JobHome';
 import axios from 'axios';
-import { UserContext } from '../userContext/userContext';
 
 const Job = () => {
   const [hoverLeft, setHoverLeft] = useState(false);
@@ -13,27 +13,39 @@ const Job = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const navigate = useNavigate(); // For redirecting
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const token = localStorage.getItem("TOKEN");
 
   const fetchJobs = async () => {
     try {
-      if (!userInfo) {
+      // Check if user is logged in
+      if (!userInfo || !token) {
         setError({ message: "Vui lòng đăng nhập để xem công việc." });
         setLoading(false);
         return;
       }
 
+      // Restrict jobseekers from accessing this page
+      if (userInfo.role !== "recruiter") {
+        setError({ message: "Bạn không có quyền truy cập trang này." });
+        setLoading(false);
+        // Optionally redirect jobseekers
+        navigate('/'); // Adjust the redirect path as needed
+        return;
+      }
+
       setLoading(true);
-      const response = await axios.get(
-        userInfo.role === "jobseeker"
-          ? "http://localhost:5000/jobseeker/viewAllPosts"
-          : "http://localhost:5000/recruiter/viewAllPosts",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setJobs(response.data?.data);
+      const response = await axios.get("http://localhost:5000/recruiter/viewOwnPost", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Assuming the API returns { success: true, posts: [...] }
+      if (response.data.success) {
+        setJobs(response.data.posts);
+      } else {
+        setError({ message: response.data.message || "Không tìm thấy bài đăng." });
+      }
     } catch (error) {
       console.error("Lỗi Axios:", error);
       setError(error.response?.data?.message || "Đã xảy ra lỗi.");
@@ -70,7 +82,7 @@ const Job = () => {
   return (
     <div className='w-[90%] m-auto'>
       <div className='TitleJobsection text-[30px] flex mt-5 mb-3 justify-between items-center'>
-        <span>Việc làm tốt nhất</span>
+        <span>Công việc của bạn</span> {/* Updated title to reflect recruiter's own jobs */}
         <span className='Dieuhuong flex items-center'>
           <div className='cursor-pointer' onMouseEnter={() => setHoverLeft(true)} onMouseLeave={() => setHoverLeft(false)}>
             {hoverLeft ? <IoIosArrowDropleftCircle /> : <IoIosArrowDropleft />}
@@ -84,7 +96,6 @@ const Job = () => {
 
       <div className="sortjob flex gap-10 mt-5">
         <span className="text-2xl">Ưu tiên hiển thị theo:</span>
-
         {['datePosted', 'dateUpdated', 'salary'].map((criteria) => (
           <div
             key={criteria}
@@ -120,7 +131,6 @@ const Job = () => {
           <p>Không có công việc nào.</p>
         )}
       </div>
-
     </div>
   );
 };
