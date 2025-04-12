@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 // import UserContext from "../userContext/userContext";
 import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2'
 var CVProfile2= [
   {
     _id: "1",
@@ -60,27 +61,82 @@ const Profile = () => {
     // console.log(formData.get("cv"));
     handleUploadSuccess(formData);
   };
+  // const handleUploadSuccess = async (formData) => {
+  //   try {
+  //     const token = localStorage.getItem("TOKEN");
+  
+  //     const response = await axios.post(
+  //       "http://localhost:5000/jobseeker/addCV",
+  //       formData,
+  //       {
+  //         headers: {
+  //           "Authorization": `Bearer ${token}`,
+  //           "Content-Type": "multipart/form-data",
+  //         },
+  //       }
+  //     );
+  //     if (response.statusText === "OK") {
+  //       setCVProfile(response.data.CVs);
+  //       // alert("Thêm CV thành công!");
+  //       Swal.fire({
+  //         icon: "success",
+  //         title: "Thêm CV thành công!",
+  //         showConfirmButton: false,
+  //         timer: 3000
+  //       });
+  //     } else {
+  //       setError("Upload thất bại.");
+  //     }
+  //   } catch (err) {
+  //     setError(err?.response?.data?.message || "Có lỗi xảy ra khi thêm CV.");
+  //   }
+  // };
   const handleUploadSuccess = async (formData) => {
     try {
       const token = localStorage.getItem("TOKEN");
+  
+      // Hiển thị loading
+      Swal.fire({
+        title: "Đang tải lên CV...",
+        text: "Vui lòng đợi trong giây lát.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
   
       const response = await axios.post(
         "http://localhost:5000/jobseeker/addCV",
         formData,
         {
           headers: {
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
         }
       );
-      if (response.statusText === "OK") {
+  
+      if (response.status === 200 || response.statusText === "OK") {
         setCVProfile(response.data.CVs);
-        alert("Thêm CV thành công!");
+        Swal.fire({
+          icon: "success",
+          title: "Thêm CV thành công!",
+          showConfirmButton: false,
+          timer: 3000,
+        });
       } else {
-        setError("Upload thất bại.");
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi",
+          text: "Upload thất bại.",
+        });
       }
     } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: err?.response?.data?.message || "Có lỗi xảy ra khi thêm CV.",
+      });
       setError(err?.response?.data?.message || "Có lỗi xảy ra khi thêm CV.");
     }
   };
@@ -171,25 +227,92 @@ const Profile = () => {
     //   console.error(error);
     //   setUploadError("Có lỗi xảy ra khi xóa CV.");
     // }
-    const handleDeleteCV = async (cvId) => {
-      try {
-        const token = localStorage.getItem("TOKEN");
-        const response = await axios.post(`http://localhost:5000/jobseeker/removeCV`,{
-          cvId: cvId
-        }, {
-          headers: { "Authorization": `Bearer ${token}` },
-        });
-        // const response = await axios.post(`http://localhost:5000/jobseeker/removeCV`, 
-        //   headers: { Authorization: `Bearer ${token}` },
-        //   data: { cvId: cvId }, 
-        // );
-        if (response.success === "OK") {
-          setCVProfile(response.data.CVs);
-          alert("Xóa CV thành công!");
+    const handleDeleteCV =  (cvId) => {
+      Swal.fire({
+        title: "Bạn muốn xóa CV này?",
+        // text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Vâng, xóa nó!",
+        cancelButtonText: "Hủy",
+      }).then(async( result) => {
+        // if (result.isConfirmed) {
+        //   try {
+        //     const token = localStorage.getItem("TOKEN");
+        //     const response = await axios.post(`http://localhost:5000/jobseeker/removeCV`,{
+        //       cvId: cvId
+        //     }, {
+        //       headers: { "Authorization": `Bearer ${token}` },
+        //     });
+        //     // const response = await axios.post(`http://localhost:5000/jobseeker/removeCV`, 
+        //     //   headers: { Authorization: `Bearer ${token}` },
+        //     //   data: { cvId: cvId }, 
+        //     // );
+        //     console.log(response);
+        //     if (response.data.success === "OK") {
+        //       // alert("Xóa CV thành công!");
+        //       Swal.fire({
+        //         title: "Deleted!",
+        //         text: "Your file has been deleted.",
+        //         icon: "success",
+        //         timer: 3000,
+        //       });
+        //       setCVProfile(response.data.data.CVs);
+        //     }
+        //   } catch (err) {
+        //     setError(err.response.data.message || "Có lỗi xảy ra khi xóa CV.");
+        //   }
+          
+        // }
+        if (result.isConfirmed) {
+          // Swal.fire({
+          //   title: "Đang xóa CV...",
+          //   text: "Vui lòng đợi trong giây lát.",
+          //   allowOutsideClick: false,
+          //   didOpen: () => {
+          //     Swal.showLoading();
+          //   }
+          // });
+        
+          try {
+            const token = localStorage.getItem("TOKEN");
+            // const response = await axios.post(
+            //   `http://localhost:5000/jobseeker/removeCV`,
+            //   { cvId: cvId },
+            //   {
+            //     headers: { Authorization: `Bearer ${token}` },
+            //   }
+            // );
+            const response = await axios.post(`http://localhost:5000/jobseeker/removeCV`,{
+              cvId: cvId
+            }, {
+              headers: { "Authorization": `Bearer ${token}` },
+            });
+            console.log(response);
+            if (response.data.success) {
+              setCVProfile(response.data.data.CVs);
+        
+              Swal.fire({
+                title: "Đã xóa!",
+                text: "CV của bạn đã được xóa.",
+                icon: "success",
+              });
+            } else {
+              throw new Error("Xóa không thành công");
+            }
+          } catch (err) {
+            Swal.fire({
+              icon: "error",
+              title: "Lỗi",
+              text: err?.response?.data?.message || "Có lỗi xảy ra khi xóa CV.",
+            });
+          }
         }
-      } catch (err) {
-        setError(err.response.message || "Có lỗi xảy ra khi xóa CV.");
-      }
+        
+      });
+      
     };
 
   return (
