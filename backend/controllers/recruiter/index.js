@@ -48,22 +48,26 @@ const viewPostsByCategory = async (req, res) => {
 };
 
 const createPost = async (req, res) => {
-    try {
-        const { title, content, salary, address, category } = req.body;
-        const newPost = new Post({
-            title,
-            content,
-            salary,
-            address,
-            user_id: req.user._id,
-            category,
-            companyName: req.user.userName,
-        });
-        await newPost.save();
-        res.status(201).json({ success: true, message: "Post created successfully", post: newPost });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
+  try {
+    const { title, content, salary, address, category } = req.body;
+    const newPost = new Post({
+      title,
+      content,
+      salary,
+      address,
+      user_id: req.user._id,
+      category,
+      companyName: req.user.userName,
+    });
+    await newPost.save();
+    res.status(201).json({
+      success: true,
+      message: "Post created successfully",
+      post: newPost,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 const viewAllCV = async (req, res) => {
@@ -224,15 +228,16 @@ const viewAllJobAppicationsByPostId = async (req, res) => {
     const postId = req.params.id;
     const applications = await JobApplication.find({ job_id: postId });
     if (!applications || applications.length === 0) {
-      return res
-        .status(404)
-        .json({ success: false, message: "No applications found for this post" });
+      return res.status(404).json({
+        success: false,
+        message: "No applications found for this post",
+      });
     }
     res.status(200).json({ success: true, data: applications });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
-}
+};
 const rejectApplication = async (req, res) => {
   try {
     const applicationId = req.params.id;
@@ -269,6 +274,16 @@ const acceptApplication = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+const deleteCVRec = async (req, res) => {
+  try {
+    const cv_id = req.params.id;
+    const foundCV = await JobApplication.deleteOne({ _id: cv_id });
+    console.log("foundVC: ", foundCV);
+    res.status(200).json({ message: "Delete CV successfully!", success: true });
+  } catch (error) {
+    res.status(500).json({ message: "Delete CV fail!!!", success: false });
+  }
+};
 module.exports = {
   viewPostById,
   deleteAccount,
@@ -284,5 +299,6 @@ module.exports = {
   viewOwnPost,
   viewAllJobAppicationsByPostId,
   rejectApplication,
-  acceptApplication
+  acceptApplication,
+  deleteCVRec,
 };

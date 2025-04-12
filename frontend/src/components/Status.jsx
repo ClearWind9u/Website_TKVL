@@ -1,53 +1,73 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-const temp = [
-  {
-    title: "Frontend Developer tại ABC Corp",
-    cvName: "Frontend CV.pdf",
-    cvStatus: "Đã nộp",
-  },
-  {
-    title: "Backend Developer tại XYZ Ltd",
-    cvName: "Backend Cv.pdf",
-    cvStatus: "Đang xét duyệt",
-  },
-  {
-    title: "Fullstack Intern tại DevTech",
-    cvName: "Frontend CV.pdf",
-    cvStatus: "Từ chối",
-  }
-];
 
 const State = () => {
-  const [appliedArticles, setAppliedArticles] = useState(temp); // Dữ liệu giả lập
-  const [loading, setLoading] = useState(true); 
+  const [appliedArticles, setAppliedArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const statusStates = [
-    { text: 'Đã xem', bgColor: 'bg-yellow-400', textColor: 'text-white' },
-    { text: 'Chưa xem', bgColor: 'bg-white', textColor: 'text-black' },
-    { text: 'Từ chối', bgColor: 'bg-red-500', textColor: 'text-white' },
-    { text: 'Đồng ý', bgColor: 'bg-green-500', textColor: 'text-white' },
+    { text: "Đã xem", bgColor: "bg-yellow-400", textColor: "text-white" },
+    { text: "Chưa xem", bgColor: "bg-white", textColor: "text-black" },
+    { text: "Bị từ chối", bgColor: "bg-red-500", textColor: "text-white" },
+    { text: "Được chấp nhận", bgColor: "bg-green-500", textColor: "text-white" },
   ];
 
   useEffect(() => {
     const fetchAppliedArticles = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/jobseeker/info/listApply', { withCredentials: true });
-        if (response.data && response.data.data) {
-          setAppliedArticles(response.data.data);
+        const token = localStorage.getItem("TOKEN");
+        if (!token) {
+          throw new Error("No authentication token found");
+        }
+
+        const response = await axios.get(
+          "http://localhost:5000/jobseeker/viewAllJobApplications",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (response.data.success && response.data.data) {
+          const statusMap = {
+            pending: "Chưa xem",
+            viewed: "Đã xem",
+            rejected: "Bị từ chối",
+            accepted: "Được chấp nhận",
+          };
+
+          const transformedApplications = response.data.data.map((app) => ({
+            title: app.job_name || "Công việc không xác định",
+            cvName: app.cv ? app.cv.split("/").pop() : "Không có CV",
+            cvLink: app.cv || null,
+            cvStatus: statusMap[app.status] || "Chưa xem",
+          }));
+          setAppliedArticles(transformedApplications);
+        } else {
+          setAppliedArticles([]);
         }
       } catch (error) {
-        console.error("Error fetching applied articles:", error);
+        console.error("Error fetching applied articles:", error.message);
+        setAppliedArticles([]);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
     fetchAppliedArticles();
   }, []);
 
+  const handleCVClick = (cvLink) => {
+    if (cvLink) {
+      window.open(cvLink, "_blank", "noopener,noreferrer");
+    } else {
+      alert("Không có CV để xem!");
+    }
+  };
+
   if (loading) {
-    return <div>Loading...</div>;
+    return <div>Đang tải...</div>;
   }
 
   return (
@@ -80,79 +100,105 @@ const State = () => {
           key="olk-qaHF"
         >
           <div
-            className="w-full text-[#000000] text-[24px] font-bold text-center flex justify-center items-center h-full rounded-none bg-[rgba(0,_0,_0,_0)]"
+            className="w-[45%] text-[#000000] text-[24px] font-bold text-center flex justify-center items-center h-full rounded-none bg-[rgba(0,_0,_0,_0)]"
             data-oid="glal7h9"
           >
-            Công viêc ứng tuyển
+            Công việc ứng tuyển
           </div>
           <div
-            className="w-1/2 text-[#000000] text-[24px] font-bold text-center flex justify-center items-center h-full rounded-none bg-[rgba(0,_0,_0,_0)]"
+            className="w-[35%] text-[#000000] text-[24px] font-bold text-center flex justify-center items-center h-full rounded-none bg-[rgba(0,_0,_0,_0)]"
             data-oid="cj9xlx_"
           >
             CV đã gửi
           </div>
           <div
-            className="w-[30%] text-[24px] font-bold text-center flex justify-center items-center text-[#000000] h-full rounded-none bg-[rgba(0,_0,_0,_0)]"
-            data-oid="r20v9.:" 
+            className="w-[20%] text-[24px] font-bold text-center flex justify-center items-center text-[#000000] h-full rounded-none bg-[rgba(0,_0,_0,_0)]"
+            data-oid="r20v9.:"
           >
             Tình trạng
           </div>
         </div>
 
-        {/* Lặp qua các bài viết ứng tuyển và trạng thái CV */}
-        {appliedArticles.map((article, index) => (
-          <div
-            key={`row-${index}`}
-            className="h-[100px] w-full flex justify-start items-center gap-[10px] bg-[#00000000] border-[#00000000]"
-            data-oid="hox-ts9"
-          >
-            <button
-              className="h-[100px] w-full text-[#000000] text-[24px] font-bold text-center flex justify-center items-center rounded-[30px] border-[#474B53] border-2 bg-cover bg-center hover:opacity-90 transition-opacity duration-200 relative overflow-hidden"
-              style={{
-                backgroundImage:
-                  'url("https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&auto=format&fit=crop")',
-              }}
-              onClick={() => console.log('Button clicked')}
-              data-oid="9a1e6_l"
-            >
-              <span
-                className="z-10 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]"
-                data-oid="q:a61__"
-              >
-                {article.title}
-              </span>
-            </button>
-
-            <button
-              className="h-[100px] w-1/2 text-[#000000] text-[24px] font-bold text-center flex justify-center items-center rounded-[30px] border-[#474B53] border-2 bg-cover bg-center hover:opacity-90 transition-opacity duration-200 relative overflow-hidden"
-              style={{
-                backgroundImage:
-                  'url("https://images.unsplash.com/photo-1557683316-973673baf926?w=800&auto=format&fit=crop")',
-              }}
-              onClick={() => console.log('CV Button clicked')}
-              data-oid="cpzujuc"
-            >
-              <span
-                className="z-10 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]"
-                data-oid="t9ihipq"
-              >
-                {article.cvName}
-              </span>
-            </button>
-
-            <div
-              className={`h-[100px] w-[30%] text-[24px] font-bold text-center flex justify-center items-center rounded-[30px] border-[#000000] border-2 ${statusStates[index % statusStates.length].bgColor}`}
-              data-oid="quv..k:"
-            >
-              <span
-                className={statusStates[index % statusStates.length].textColor}
-                data-oid="t81gbqv"
-              >
-                {article.cvStatus}
-              </span>
-            </div>
+        {appliedArticles.length === 0 ? (
+          <div className="w-full text-center text-[24px] text-gray-500 mt-4">
+            Chưa có đơn ứng tuyển nào
           </div>
-        ))}
+        ) : (
+          appliedArticles.map((article, index) => (
+            <div
+              key={`row-${index}`}
+              className="h-[100px] w-full flex justify-start items-center gap-[10px] bg-[#00000000] border-[#00000000]"
+              data-oid="hox-ts9"
+            >
+              <button
+                className="h-[100px] w-[45%] text-[#000000] text-[20px] font-bold text-center flex justify-center items-center rounded-[30px] border-[#474B53] border-2 bg-cover bg-center hover:opacity-90 transition-opacity duration-200 relative overflow-hidden"
+                style={{
+                  backgroundImage:
+                    "url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=800&auto=format&fit=crop')",
+                }}
+                onClick={() => console.log("Job button clicked")}
+                data-oid="9a1e6_l"
+              >
+                <span
+                  className="z-10 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] px-2"
+                  style={{
+                    whiteSpace: "normal",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                  }}
+                  data-oid="q:a61__"
+                >
+                  {article.title}
+                </span>
+              </button>
+
+              <button
+                className="h-[100px] w-[35%] text-[#000000] text-[18px] font-bold text-center flex justify-center items-center rounded-[30px] border-[#474B53] border-2 bg-cover bg-center hover:opacity-90 transition-opacity duration-200 relative overflow-hidden"
+                style={{
+                  backgroundImage:
+                    "url('https://images.unsplash.com/photo-1557683316-973673baf926?w=800&auto=format&fit=crop')",
+                }}
+                onClick={() => handleCVClick(article.cvLink)}
+                data-oid="cpzujuc"
+              >
+                <span
+                  className="z-10 text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)] px-2"
+                  style={{
+                    whiteSpace: "normal",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: "vertical",
+                  }}
+                  data-oid="t9ihipq"
+                >
+                  {article.cvName}
+                </span>
+              </button>
+
+              <div
+                className={`h-[100px] w-[20%] text-[20px] font-bold text-center flex justify-center items-center rounded-[30px] border-[#000000] border-2 ${
+                  statusStates.find((s) => s.text === article.cvStatus)?.bgColor || "bg-gray-200"
+                }`}
+                data-oid="quv..k:"
+              >
+                <span
+                  className={
+                    statusStates.find((s) => s.text === article.cvStatus)?.textColor ||
+                    "text-black"
+                  }
+                  data-oid="t81gbqv"
+                >
+                  {article.cvStatus}
+                </span>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
