@@ -19,7 +19,8 @@ const {
   viewOwnPost,
   viewAllJobAppicationsByPostId,
   rejectApplication,
-  acceptApplication
+  acceptApplication,
+  deleteCVRec,
 } = require("../../controllers/recruiter");
 router.post(
   "/deleteAccount",
@@ -42,12 +43,7 @@ router.post("/deletePost", authenticateMiddleware, isRecruiter, deletePost);
 router.post("/editPost", authenticateMiddleware, isRecruiter, editPost);
 router.post("/editProfile", authenticateMiddleware, isRecruiter, editProfile);
 router.get("/viewPost/:id", authenticateMiddleware, viewPostById);
-router.get(
-  "/viewOwnPost",
-  authenticateMiddleware,
-  isRecruiter,
-  viewOwnPost
-);
+router.get("/viewOwnPost", authenticateMiddleware, isRecruiter, viewOwnPost);
 router.get(
   "/viewAllJobAppicationsByPostId/:id",
   authenticateMiddleware,
@@ -66,4 +62,5 @@ router.post(
   isRecruiter,
   acceptApplication
 );
+router.post("/deleteCVRec/:id", authenticateMiddleware, deleteCVRec);
 module.exports = router;

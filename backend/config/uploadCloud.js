@@ -13,12 +13,12 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary,
+  resource_type: "raw", // rất quan trọng
   params: {
-    folder: "CVfiles", // Lưu file vào thư mục CVfiles trên Cloudinary
-    format: async (req, file) => "pdf", // Chỉ lưu file dưới dạng PDF
+    folder: "CVfiles",
+    format: async (req, file) => "pdf",
     public_id: (req, file) =>
-      file.originalname.split(".")[0].replaceAll(" ", "") + Date.now(), // Lấy tên file gốc (không có phần mở rộng)
-    resource_type: "raw",
+      file.originalname.split(".")[0].replaceAll(" ", "") + Date.now(),
     flags: "attachment",
   },
 });
