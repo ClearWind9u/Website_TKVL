@@ -33,29 +33,71 @@ const Profile = () => {
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
-  const handleUploadSuccess = (newCV) => {
-    setCVProfile(prevList => [...prevList, newCV]);
-  };
+  // const handleUploadSuccess = async (newCV) => {
+  //   try {
+  //     const token = localStorage.getItem("TOKEN");
+  //     const response = await axios.post(`http://localhost:5000/jobseeker/addCV`,{
+  //       cv: newCV
+  //     }, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
+  //     if (response.success === "OK") {
+  //       setCVProfile(response.data.CVs);
+  //       alert("Thêm CV thành công!");
+  //     }
+  //   } catch (err) {
+  //     setError(err.response.message || "Có lỗi xảy ra khi thêm CV.");
+  //   }
+  // };
   
-  const handleUpload = async () => {
+  const handleUpload = () => {
     if (!selectedFile) {
       setUploadError("Vui lòng chọn một tệp CV để tải lên.");
       return;
     }
-    const reader = new FileReader();
-  reader.onloadend = () => {
-    const base64Data = reader.result.split(',')[1]; // bỏ phần data:xxx;base64,
-    const newCV = {
-      _id: Date.now().toString(), // ID tạm thời
-      name: selectedFile.name,
-      cvFile: {
-        contentType: selectedFile.type,
-        data: base64Data,
-      }
-    };
-    handleUploadSuccess(newCV); // thêm vào list
+    const formData = new FormData();
+    formData.append("cv", selectedFile);
+    // console.log(formData.get("cv"));
+    handleUploadSuccess(formData);
   };
-  reader.readAsDataURL(selectedFile);
+  const handleUploadSuccess = async (formData) => {
+    try {
+      const token = localStorage.getItem("TOKEN");
+  
+      const response = await axios.post(
+        "http://localhost:5000/jobseeker/addCV",
+        formData,
+        {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      if (response.statusText === "OK") {
+        setCVProfile(response.data.CVs);
+        alert("Thêm CV thành công!");
+      } else {
+        setError("Upload thất bại.");
+      }
+    } catch (err) {
+      setError(err?.response?.data?.message || "Có lỗi xảy ra khi thêm CV.");
+    }
+  };
+  
+    // const reader = new FileReader();
+  // reader.onloadend = () => {
+  //   // const base64Data = reader.result.split(',')[1]; // bỏ phần data:xxx;base64,
+  //   // const newCV = {
+  //   //   _id: Date.now().toString(), // ID tạm thời
+  //   //   name: selectedFile.name,
+  //   //   cvFile: {
+  //   //     contentType: selectedFile.type,
+  //   //     data: base64Data,
+  //   //   }
+  //   // };
+  // };
+  // reader.readAsDataURL(selectedFile);
 
     // const formData = new FormData();
     // formData.append("cvFile", selectedFile);
@@ -81,7 +123,6 @@ const Profile = () => {
     //   setUploadError("Có lỗi xảy ra khi tải lên CV. Vui lòng thử lại.");
     //   console.error(error);
     // }
-  };
 
   // Xử lý xóa CV
   // const handleDeleteCV = async (cvId) => {
@@ -102,15 +143,54 @@ const Profile = () => {
   //     console.error(error);
   //   }
   // };
-  const handleDeleteCV = (cvId) => {
-    try {
-      setCVProfile((prevCVs) => prevCVs.filter((cv) => cv._id !== cvId));
-      alert("Xóa CV thành công!");
-    } catch (error) {
-      console.error(error);
-      setUploadError("Có lỗi xảy ra khi xóa CV.");
-    }
-  };    
+
+  useEffect(() => {
+    const fecthCV = async (e) => {
+      const token = localStorage.getItem("TOKEN");
+  
+      try {
+        const response = await axios.get("http://localhost:5000/jobseeker/getAllCV",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        if (response.statusText === "OK") {
+          setCVProfile(response.data.data)
+        }
+      } catch (err) {
+        setError(err.response?.data?.message || "Truy cập dữ liệu thất bại!");
+      }
+    };
+    fecthCV();
+  },[CVProfile]);
+  
+    // try {
+    //   setCVProfile((prevCVs) => prevCVs.filter((cv) => cv._id !== cvId));
+    //   alert("Xóa CV thành công!");
+    // } catch (error) {
+    //   console.error(error);
+    //   setUploadError("Có lỗi xảy ra khi xóa CV.");
+    // }
+    const handleDeleteCV = async (cvId) => {
+      try {
+        const token = localStorage.getItem("TOKEN");
+        const response = await axios.post(`http://localhost:5000/jobseeker/removeCV`,{
+          cvId: cvId
+        }, {
+          headers: { "Authorization": `Bearer ${token}` },
+        });
+        // const response = await axios.post(`http://localhost:5000/jobseeker/removeCV`, 
+        //   headers: { Authorization: `Bearer ${token}` },
+        //   data: { cvId: cvId }, 
+        // );
+        if (response.success === "OK") {
+          setCVProfile(response.data.CVs);
+          alert("Xóa CV thành công!");
+        }
+      } catch (err) {
+        setError(err.response.message || "Có lỗi xảy ra khi xóa CV.");
+      }
+    };
 
   return (
     <div className="flex flex-col w-full items-center text-[#3C3C3C] border-[#00000000] gap-10 mb-3">
@@ -173,15 +253,18 @@ const Profile = () => {
           CVProfile.map((cv, index) => (
             <div key={index} className="flex flex-col gap-2 border p-4 rounded-md">
               {/* Hiển thị tên CV và id */}
-              <p className="font-semibold">Tên CV: {cv?.name || "Chưa có tên CV"}</p>
+              <p className="font-semibold">Tên CV: {cv?.cvName || "Chưa có tên CV"}</p>
               <p className="font-semibold">ID: {cv?._id}</p>
-              <a
-                href={`data:${cv?.cvFile?.contentType};base64,${cv?.cvFile?.data}`}
-                download={`${cv?.name || "CV"}.pdf`}
-                className="text-blue-500 underline"
-              >
-                Tải xuống CV
-              </a>
+              <div className="flex gap-4">
+                <a className="text-blue-500 underline" href={`${cv.cvLink}`} download>
+                  Tải CV
+                </a>
+
+                <a className="text-blue-500 underline" href={`${cv.cvLink}`} target="_blank" rel="noopener noreferrer">
+                  Xem CV
+                </a>
+              </div>
+              
               <button
                 onClick={() => handleDeleteCV(cv._id)}
                 className="bg-red-500 text-white p-2 rounded-md hover:bg-red-600"

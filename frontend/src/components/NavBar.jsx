@@ -22,7 +22,7 @@ const NavBar = () => {
   const handleLogout = () => {
     setIsDropdownVisible(false);
     logout();
-    navigate('/login');
+    navigate('/');
   };
   const handleBellClick = () => {
     setIsOpen(!isOpen);
@@ -31,12 +31,12 @@ const NavBar = () => {
   const menuItems = userInfo?.role === "recruiter" ? [
     { path: "/recruiter/homepage", label: "Trang chủ" },
     { path: "/recruiter/create", label: "Tạo công việc" },
-    { path: "/recruiter/job", label: "Công việc" },
+    { path: "/recruiter/job", label: "Công việc đã tạo" },
     { path: "/recruiter/candidate", label: "Ứng viên" }
   ] : [
     { path: "/jobseeker/homepage", label: "Trang chủ" },
     { path: "/jobseeker/profile", label: "Hồ sơ & CV" },
-    { path: "/jobseeker/job", label: "Công việc" },
+    // { path: "/jobseeker/job", label: "Công việc" },
     { path: "/jobseeker/status", label: "Trạng thái" },
     { path: "/jobseeker/favor", label: "Yêu thích" }
   ];

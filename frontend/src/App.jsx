@@ -21,7 +21,7 @@ import Recruiter from "./Layout/Recruiter";
 const App = () => {
 
   const role = localStorage.getItem("ROLE")
-  const hideImgBg = ["/login", "/register"].includes(window.location.pathname); //Nếu đường dẫn là /login hoặc /register thì ẩn ảnh nền
+  const hideImgBg = ["/","/login", "/register"].includes(window.location.pathname); //Nếu đường dẫn là /login hoặc /register thì ẩn ảnh nền
   return (
     <div className="flex flex-col min-h-screen">
       <Router>
