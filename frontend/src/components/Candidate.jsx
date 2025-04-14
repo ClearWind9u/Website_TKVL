@@ -60,8 +60,8 @@ const Candidate = () => {
         if (!token) {
           throw new Error("Vui lòng đăng nhập lại!");
         }
-        await axios.delete(
-          `http://localhost:5000/recruiter/deleteApplication/${item._id}`,
+        await axios.post(
+          `http://localhost:5000/recruiter/deleteCVRec/${item._id}`,{},
           {
             headers: { Authorization: `Bearer ${token}` },
           }

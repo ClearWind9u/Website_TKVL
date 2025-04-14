@@ -139,7 +139,7 @@ const CompDetail = () => {
       const formData = new FormData();
       formData.append("job_id", id);
       formData.append("job_name", jobDetail.post.title);
-      formData.append("created_at", new Date().toISOString());
+      // formData.append("created_at", new Date().toISOString());
 
       if (selectedCVId) {
         const selectedCV = cvList.find((cv) => cv._id === selectedCVId);
@@ -560,8 +560,8 @@ const CompDetail = () => {
                         </p>
                         <p>
                           <strong>Ngày ứng tuyển:</strong>{" "}
-                          {app.created_at
-                            ? new Date(app.created_at).toLocaleDateString()
+                          {app.appliedAt
+                            ? new Date(app.appliedAt).toLocaleDateString()
                             : "N/A"}
                         </p>
                       </div>
