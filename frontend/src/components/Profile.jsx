@@ -211,7 +211,8 @@ const Profile = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        if (response.statusText === "OK") {
+        console.log(response);
+        if (response.status === 200) {
           setCVProfile(response.data.data)
         }
       } catch (err) {
@@ -292,7 +293,7 @@ const Profile = () => {
               headers: { "Authorization": `Bearer ${token}` },
             });
             console.log(response);
-            if (response.data.success) {
+            if (response.status == 200) {
               setCVProfile(response.data.data.CVs);
         
               Swal.fire({
