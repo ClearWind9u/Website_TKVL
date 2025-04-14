@@ -9,6 +9,7 @@ const Candidate = () => {
   const [error, setError] = useState(null);
   const token = localStorage.getItem("TOKEN");
   const navigate = useNavigate();
+  const API_URL = 'https://it-job-search-be.vercel.app';
 
   useEffect(() => {
     const fetchCVs = async () => {

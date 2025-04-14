@@ -35,7 +35,7 @@ app.use('/admin', adminRouter);
 app.use('/jobseeker', jobseekerRouter);
 app.use('/recruiter', recruiterRouter);
 // Khởi động server
+connectMongoDB();
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
-    connectMongoDB();
 });
