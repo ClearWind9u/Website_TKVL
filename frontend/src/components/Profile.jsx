@@ -34,6 +34,7 @@ const Profile = () => {
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
   };
+  const API_URL = 'https://it-job-search-be.vercel.app';
   // const handleUploadSuccess = async (newCV) => {
   //   try {
   //     const token = localStorage.getItem("TOKEN");
@@ -106,7 +107,7 @@ const Profile = () => {
       });
   
       const response = await axios.post(
-        "http://localhost:5000/jobseeker/addCV",
+        `${API_URL}/jobseeker/addCV`,
         formData,
         {
           headers: {
@@ -205,7 +206,7 @@ const Profile = () => {
       const token = localStorage.getItem("TOKEN");
   
       try {
-        const response = await axios.get("http://localhost:5000/jobseeker/getAllCV",
+        const response = await axios.get(`${API_URL}/jobseeker/getAllCV`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -285,7 +286,7 @@ const Profile = () => {
             //     headers: { Authorization: `Bearer ${token}` },
             //   }
             // );
-            const response = await axios.post(`http://localhost:5000/jobseeker/removeCV`,{
+            const response = await axios.post(`${API_URL}/jobseeker/removeCV`,{
               cvId: cvId
             }, {
               headers: { "Authorization": `Bearer ${token}` },

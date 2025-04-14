@@ -13,6 +13,7 @@ const Login = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const { login} = useContext(UserContext);
+  const API_URL = 'https://it-job-search-be.vercel.app';
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -36,7 +37,7 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/auth/login", {
+      const response = await axios.post(`${API_URL}/auth/login`, {
         userEmail: email,
         password: password,
         role: role,

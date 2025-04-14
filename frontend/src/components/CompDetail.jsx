@@ -44,6 +44,7 @@ const CompDetail = () => {
     address: "",
     category: [],
   });
+  const API_URL = 'https://it-job-search-be.vercel.app';
 
   useEffect(() => {
     const fetchJobDetailAndStatus = async () => {
@@ -51,8 +52,8 @@ const CompDetail = () => {
         // Fetch job details
         const response1 = await axios.get(
           userInfo?.role === "jobseeker"
-            ? `http://localhost:5000/jobseeker/viewPost/${id}`
-            : `http://localhost:5000/recruiter/viewPost/${id}`,
+            ? `${API_URL}/jobseeker/viewPost/${id}`
+            : `${API_URL}/recruiter/viewPost/${id}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -62,8 +63,8 @@ const CompDetail = () => {
         // Fetch random jobs
         const response2 = await axios.get(
           userInfo.role === "jobseeker"
-            ? "http://localhost:5000/jobseeker/viewAllPosts"
-            : "http://localhost:5000/recruiter/viewAllPosts",
+            ? `${API_URL}/jobseeker/viewAllPosts`
+            : `${API_URL}/recruiter/viewAllPosts`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -76,7 +77,7 @@ const CompDetail = () => {
         if (userInfo?.role === "jobseeker" && userInfo?._id) {
           try {
             const applyResponse = await axios.get(
-              `http://localhost:5000/jobseeker/checkApplication/${id}`,
+              `${API_URL}/jobseeker/checkApplication/${id}`,
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
@@ -103,7 +104,7 @@ const CompDetail = () => {
     const fetchCVList = async () => {
       try {
         const cvResponse = await axios.get(
-          "http://localhost:5000/jobseeker/getAllCV",
+          `${API_URL}/jobseeker/getAllCV`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -160,7 +161,7 @@ const CompDetail = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/jobseeker/applyForJob",
+        `${API_URL}/jobseeker/applyForJob`,
         formData,
         {
           headers: {
@@ -203,7 +204,7 @@ const CompDetail = () => {
     setApplicationsError(null);
     try {
       const response = await axios.get(
-        `http://localhost:5000/recruiter/viewAllJobAppicationsByPostId/${id}`,
+        `${API_URL}/recruiter/viewAllJobAppicationsByPostId/${id}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -214,7 +215,7 @@ const CompDetail = () => {
         applicationsData.map(async (app) => {
           try {
             const userResponse = await axios.get(
-              `http://localhost:5000/recruiter/viewUser/${app.applicant_id}`,
+              `${API_URL}/recruiter/viewUser/${app.applicant_id}`,
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
@@ -267,7 +268,7 @@ const CompDetail = () => {
   const handleEditSubmit = async () => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/recruiter/editPost",
+        `${API_URL}/recruiter/editPost`,
         formData,
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -299,7 +300,7 @@ const CompDetail = () => {
     if (window.confirm("Bạn có chắc muốn xóa mục này?")) {
       try {
         await axios.post(
-          "http://localhost:5000/recruiter/deletePost",
+          `${API_URL}/recruiter/deletePost`,
           { postId },
           { headers: { Authorization: `Bearer ${token}` } }
         );

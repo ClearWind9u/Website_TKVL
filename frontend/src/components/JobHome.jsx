@@ -19,27 +19,6 @@ const SingleJob = ({ id, title, salary, address, category, user_id,companyName }
   const token = localStorage.getItem("TOKEN");
   console.log(companyName);
 
-  // useEffect(() => {
-  //   const fetchUserName = async () => {
-  //     try {
-  //       const response = await axios.get(userInfo.role === "jobseeker"
-  //         ? `http://localhost:5000/jobseeker/viewUser/${user_id}`
-  //         : `http://localhost:5000/recruiter/viewUser/${user_id}`,
-  //         {
-  //           headers: { Authorization: `Bearer ${token}` },
-  //         });
-  //       setUserName(response.data?.data.userName || "Không xác định");
-  //     } catch (error) {
-  //       console.error("Lỗi khi lấy userName:", error);
-  //       setUserName("Không xác định");
-  //     }
-  //   };
-
-  //   if (user_id) {
-  //     fetchUserName();
-  //   }
-  // }, [user_id]);
-
   const handleJobClick = (id) => {
     if (userInfo.role === "jobseeker") {
       navigate(`/jobseeker/jobDetail/${id}`);
@@ -96,6 +75,7 @@ const JobHome = () => {
   const [selectedOptions, setSelectedOptions] = useState([]);  // Lưu các lựa chọn đã chọn
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const token = localStorage.getItem("TOKEN");
+  const API_URL = 'https://it-job-search-be.vercel.app';
 
   const location = useLocation();
   //const isHomePage = location.pathname === '/';
@@ -160,8 +140,8 @@ const JobHome = () => {
       setLoading(true);
       const endpoint =
         userInfo.role === "jobseeker"
-          ? `http://localhost:5000/jobseeker/viewPostsByCategory/${categories.join(",")}`
-          : `http://localhost:5000/recruiter/viewPostsByCategory/${categories.join(",")}`;
+          ? `${API_URL}/jobseeker/viewPostsByCategory/${categories.join(",")}`
+          : `${API_URL}/recruiter/viewPostsByCategory/${categories.join(",")}`;
 
       const response = await axios.get(endpoint, {
         headers: { Authorization: `Bearer ${token}` },
@@ -187,8 +167,8 @@ const JobHome = () => {
       setLoading(true);
       const response = await axios.get(
         userInfo.role === "jobseeker"
-          ? "http://localhost:5000/jobseeker/viewAllPosts"
-          : "http://localhost:5000/recruiter/viewAllPosts",
+          ? `${API_URL}/jobseeker/viewAllPosts`
+          : `${API_URL}/recruiter/viewAllPosts`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

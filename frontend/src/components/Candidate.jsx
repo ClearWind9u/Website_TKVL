@@ -18,7 +18,7 @@ const Candidate = () => {
           throw new Error("Vui lòng đăng nhập lại!");
         }
         const response = await axios.get(
-          "http://localhost:5000/recruiter/viewAllCV",
+          `${API_URL}/recruiter/viewAllCV`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -62,7 +62,7 @@ const Candidate = () => {
           throw new Error("Vui lòng đăng nhập lại!");
         }
         await axios.post(
-          `http://localhost:5000/recruiter/deleteCVRec/${item._id}`,{},
+          `${API_URL}/recruiter/deleteCVRec/${item._id}`,{},
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -98,7 +98,7 @@ const Candidate = () => {
             ? `/recruiter/acceptApplication/${item._id}`
             : `/recruiter/rejectApplication/${item._id}`;
         await axios.post(
-          `http://localhost:5000${endpoint}`,
+          `${API_URL}${endpoint}`,
           {},
           {
             headers: { Authorization: `Bearer ${token}` },

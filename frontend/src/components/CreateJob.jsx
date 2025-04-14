@@ -27,6 +27,7 @@ const CreateJob = () => {
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const token = localStorage.getItem("TOKEN");
   const navigate = useNavigate();
+  const API_URL = 'https://it-job-search-be.vercel.app';
 
   // Xử lý thay đổi input
   const handleChange = (field, value) => {
@@ -85,7 +86,7 @@ const CreateJob = () => {
         user_id: userInfo._id
       };
   
-      const response = await axios.post("http://localhost:5000/recruiter/createPost", payload, {
+      const response = await axios.post(`${API_URL}/recruiter/createPost`, payload, {
         headers: { Authorization: `Bearer ${token}` }
       });
   
