@@ -4,6 +4,7 @@ import axios from "axios";
 const State = () => {
   const [appliedArticles, setAppliedArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API_URL = 'https://it-job-search-be.vercel.app';
 
   const statusStates = [
     { text: "Đã xem", bgColor: "bg-yellow-400", textColor: "text-white" },
@@ -21,7 +22,7 @@ const State = () => {
         }
 
         const response = await axios.get(
-          "http://localhost:5000/jobseeker/viewAllJobApplications",
+          `${API_URL}/jobseeker/viewAllJobApplications`,
           {
             headers: {
               Authorization: `Bearer ${token}`,

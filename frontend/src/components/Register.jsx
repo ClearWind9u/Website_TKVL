@@ -18,6 +18,7 @@ const Register = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
+  const API_URL = 'https://it-job-search-be.vercel.app';
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -44,7 +45,7 @@ const Register = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/auth/register", {
+      const response = await axios.post(`${API_URL}/auth/register`, {
         userName: formData.name,
         userEmail: formData.email,
         address: formData.address,

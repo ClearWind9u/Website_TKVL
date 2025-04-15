@@ -9,6 +9,7 @@ const Candidate = () => {
   const [error, setError] = useState(null);
   const token = localStorage.getItem("TOKEN");
   const navigate = useNavigate();
+  const API_URL = 'https://it-job-search-be.vercel.app';
 
   useEffect(() => {
     const fetchCVs = async () => {
@@ -17,7 +18,7 @@ const Candidate = () => {
           throw new Error("Vui lòng đăng nhập lại!");
         }
         const response = await axios.get(
-          "http://localhost:5000/recruiter/viewAllCV",
+          `${API_URL}/recruiter/viewAllCV`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -60,8 +61,8 @@ const Candidate = () => {
         if (!token) {
           throw new Error("Vui lòng đăng nhập lại!");
         }
-        await axios.delete(
-          `http://localhost:5000/recruiter/deleteApplication/${item._id}`,
+        await axios.post(
+          `${API_URL}/recruiter/deleteCVRec/${item._id}`,{},
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -97,7 +98,7 @@ const Candidate = () => {
             ? `/recruiter/acceptApplication/${item._id}`
             : `/recruiter/rejectApplication/${item._id}`;
         await axios.post(
-          `http://localhost:5000${endpoint}`,
+          `${API_URL}${endpoint}`,
           {},
           {
             headers: { Authorization: `Bearer ${token}` },

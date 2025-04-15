@@ -16,6 +16,7 @@ const Job = () => {
   const navigate = useNavigate(); // For redirecting
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const token = localStorage.getItem("TOKEN");
+  const API_URL = 'https://it-job-search-be.vercel.app';
 
   const fetchJobs = async () => {
     try {
@@ -36,7 +37,7 @@ const Job = () => {
       }
 
       setLoading(true);
-      const response = await axios.get("http://localhost:5000/recruiter/viewOwnPost", {
+      const response = await axios.get(`${API_URL}/recruiter/viewOwnPost`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
