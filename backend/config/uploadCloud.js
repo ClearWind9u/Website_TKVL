@@ -19,7 +19,6 @@ const storage = new CloudinaryStorage({
     format: async (req, file) => "pdf",
     public_id: (req, file) =>
       file.originalname.split(".")[0].replaceAll(" ", "") + Date.now(),
-    flags: "attachment",
   },
 });
 
