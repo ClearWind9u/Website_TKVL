@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Swal from 'sweetalert2';
 
 const Candidate = () => {
   const [items, setItems] = useState([]);
   const [inputValues, setInputValues] = useState({ name: "", cv: "" });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const token = localStorage.getItem("TOKEN");
   const navigate = useNavigate();
   const API_URL = 'https://it-job-search-be.vercel.app';
@@ -38,9 +38,11 @@ const Candidate = () => {
         setItems(fetchedItems);
         setLoading(false);
       } catch (err) {
-        setError(
-          err.response?.data?.message || "Có lỗi xảy ra khi tải danh sách CV!"
-        );
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi",
+          text: err.response?.data?.message || "Có lỗi xảy ra khi tải danh sách CV!",
+        });
         setLoading(false);
       }
     };
@@ -62,17 +64,26 @@ const Candidate = () => {
           throw new Error("Vui lòng đăng nhập lại!");
         }
         await axios.post(
-          `${API_URL}/recruiter/deleteCVRec/${item._id}`,{},
+          `${API_URL}/recruiter/deleteCVRec/${item._id}`,
+          {},
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
         setItems(items.filter((_, i) => i !== index));
-        alert("Đơn ứng tuyển đã được xóa!");
+        Swal.fire({
+          icon: "success",
+          title: "Thành công",
+          text: "Đơn ứng tuyển đã được xóa!",
+          showConfirmButton: false,
+          timer: 3000,
+        });
       } catch (error) {
-        alert(
-          error.response?.data?.message || "Có lỗi xảy ra khi xóa đơn ứng tuyển!"
-        );
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi",
+          text: error.response?.data?.message || "Có lỗi xảy ra khi xóa đơn ứng tuyển!",
+        });
       }
     } else {
       setItems(items.filter((_, i) => i !== index));
@@ -106,11 +117,19 @@ const Candidate = () => {
         );
         updatedItems[index].status = newStatus === "Đồng ý" ? "Đã chấp nhận" : "Đã từ chối";
         setItems(updatedItems);
-        alert(`Ứng viên đã được ${newStatus === "Đồng ý" ? "chấp nhận" : "từ chối"}!`);
+        Swal.fire({
+          icon: "success",
+          title: "Thành công",
+          text: `Ứng viên đã được ${newStatus === "Đồng ý" ? "chấp nhận" : "từ chối"}!`,
+          showConfirmButton: false,
+          timer: 3000,
+        });
       } catch (error) {
-        alert(
-          error.response?.data?.message || "Có lỗi xảy ra khi cập nhật trạng thái!"
-        );
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi",
+          text: error.response?.data?.message || "Có lỗi xảy ra khi cập nhật trạng thái!",
+        });
       }
     } else {
       updatedItems[index].status = newStatus;
@@ -149,8 +168,6 @@ const Candidate = () => {
         <h1 className="text-3xl font-bold mb-6 text-center">Danh Sách</h1>
         {loading ? (
           <p className="text-center text-lg">Đang tải...</p>
-        ) : error ? (
-          <p className="text-center text-red-600 text-lg">{error}</p>
         ) : (
           <table className="table-auto w-full text-left border-collapse border border-gray-300">
             <thead>

@@ -10,6 +10,17 @@ import { GrStatusGood } from "react-icons/gr";
 import { BiGridAlt } from "react-icons/bi";
 import { FaUsers, FaFlag } from "react-icons/fa";
 import axios from "axios";
+import Swal from "sweetalert2";
+
+// Danh sách filterOptions giống CreateJob.js
+const filterOptions = {
+  "Mức lương": ["Dưới 10 triệu", "10 - 20 triệu", "20 - 50 triệu", "Trên 50 triệu"],
+  "Địa điểm": ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Cần Thơ", "Hải Phòng"],
+  "Kinh nghiệm": ["Intern", "Fresher", "Junior", "Senior", "Leader", "Manager"],
+  "Lĩnh vực": ["Software Engineer", "AI", "DevOps", "An ninh mạng", "Tester", "IOT", "Quản trị hệ thống và mạng", "Business Analyst"],
+  "Phương thức làm việc": ["On-site", "Remote", "Hybrid", "Online", "Offline"],
+  "Hình thức làm việc": ["Full-time", "Part-time", "Freelance", "Contract", "Project"]
+};
 
 const CompDetail = () => {
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -32,7 +43,7 @@ const CompDetail = () => {
   const [uploadedCV, setUploadedCV] = useState(null);
   const [forceRender, setForceRender] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
-  const [isSubmittingCV, setIsSubmittingCV] = useState(false); // New loading state for CV submission
+  const [isSubmittingCV, setIsSubmittingCV] = useState(false);
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const token = localStorage.getItem("TOKEN");
   const navigate = useNavigate();
@@ -40,14 +51,14 @@ const CompDetail = () => {
     postId: "",
     title: "",
     content: "",
-    salary: "",
-    address: "",
-    category: [],
+    category: {},
   });
+  const [formErrors, setFormErrors] = useState({});
   const API_URL = 'https://it-job-search-be.vercel.app';
 
   useEffect(() => {
     const fetchJobDetailAndStatus = async () => {
+      setLoading(true);
       try {
         // Fetch job details
         const response1 = await axios.get(
@@ -73,16 +84,20 @@ const CompDetail = () => {
         const randomJobs = allJobs.sort(() => Math.random() - 0.5).slice(0, 7);
         setJobRandom(randomJobs);
 
-        // Check if jobseeker has applied (only for jobseekers)
+        // Check if jobseeker has applied
         if (userInfo?.role === "jobseeker" && userInfo?._id) {
           try {
-            const applyResponse = await axios.get(
-              `${API_URL}/jobseeker/checkApplication/${id}`,
+            const response = await axios.get(
+              `${API_URL}/jobseeker/viewAllJobApplications`,
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
             );
-            setHasApplied(applyResponse.data.hasApplied || false);
+            const applicationsData = Array.isArray(response.data.data) ? response.data.data : [];
+            const hasApplied = applicationsData.some(
+              (app) => app.job_id === id
+            );
+            setHasApplied(hasApplied);
           } catch (applyError) {
             console.error("Check Application Error:", applyError.response?.data || applyError.message);
             setHasApplied(false);
@@ -120,7 +135,11 @@ const CompDetail = () => {
 
   const handleApplyClick = () => {
     if (hasApplied) {
-      alert("Bạn đã ứng tuyển công việc này!");
+      Swal.fire({
+        icon: "info",
+        title: "Thông báo",
+        text: "Bạn đã ứng tuyển công việc này!",
+      });
       return;
     }
     setIsCVModalOpen(true);
@@ -128,25 +147,83 @@ const CompDetail = () => {
     setUploadedCV(null);
   };
 
+  const handleUploadCV = async (cvFile) => {
+    try {
+      const formData = new FormData();
+      formData.append("cv", cvFile);
+
+      // Hiển thị loading
+      Swal.fire({
+        title: "Đang tải lên CV...",
+        text: "Vui lòng đợi trong giây lát.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const response = await axios.post(
+        `${API_URL}/jobseeker/addCV`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200 || response.statusText === "OK") {
+        Swal.fire({
+          icon: "success",
+          title: "Thêm CV thành công!",
+          showConfirmButton: false,
+          timer: 3000,
+        });
+        // Cập nhật danh sách CV
+        const updatedCVList = [...cvList, response.data.CVs];
+        setCVList(updatedCVList);
+        return response.data.CVs; // Trả về thông tin CV mới
+      } else {
+        throw new Error("Upload thất bại.");
+      }
+    } catch (err) {
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: err?.response?.data?.message || "Có lỗi xảy ra khi thêm CV.",
+      });
+      throw err;
+    }
+  };
+
   const handleSubmitCV = async () => {
     if (!selectedCVId && !uploadedCV) {
-      alert("Vui lòng chọn một CV hoặc tải lên file CV mới.");
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "Vui lòng chọn một CV hoặc tải lên file CV mới.",
+      });
       return;
     }
 
-    setIsSubmittingCV(true); // Start loading
-
+    setIsSubmittingCV(true);
     try {
       const formData = new FormData();
       formData.append("job_id", id);
       formData.append("job_name", jobDetail.post.title);
-      // formData.append("created_at", new Date().toISOString());
+
+      let cvFile;
 
       if (selectedCVId) {
         const selectedCV = cvList.find((cv) => cv._id === selectedCVId);
         if (!selectedCV) {
-          alert("CV không hợp lệ.");
-          setIsSubmittingCV(false); // Stop loading
+          Swal.fire({
+            icon: "error",
+            title: "Lỗi",
+            text: "CV không hợp lệ.",
+          });
+          setIsSubmittingCV(false);
           return;
         }
         const response = await fetch(selectedCV.cvLink);
@@ -154,11 +231,24 @@ const CompDetail = () => {
           throw new Error("Không thể tải CV từ URL.");
         }
         const blob = await response.blob();
-        const file = new File([blob], `${selectedCV.cvName}.pdf`, { type: blob.type });
-        formData.append("cv", file);
+        cvFile = new File([blob], `${selectedCV.cvName}.pdf`, { type: blob.type });
       } else if (uploadedCV) {
-        formData.append("cv", uploadedCV);
+        // Tải CV mới lên trước
+        const newCV = await handleUploadCV(uploadedCV);
+        cvFile = uploadedCV; // Sử dụng file gốc để ứng tuyển
       }
+
+      formData.append("cv", cvFile);
+
+      // Hiển thị loading cho ứng tuyển
+      Swal.fire({
+        title: "Đang nộp CV...",
+        text: "Vui lòng đợi trong giây lát.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
 
       const response = await axios.post(
         `${API_URL}/jobseeker/applyForJob`,
@@ -172,18 +262,31 @@ const CompDetail = () => {
       );
 
       if (response.data.success) {
-        alert("Nộp CV thành công!");
+        Swal.fire({
+          icon: "success",
+          title: "Nộp CV thành công!",
+          showConfirmButton: false,
+          timer: 3000,
+        });
         setIsCVModalOpen(false);
         setSelectedCVId(null);
         setUploadedCV(null);
-        setHasApplied(true);
+        setHasApplied(true); // Cập nhật trạng thái đã ứng tuyển
       } else {
-        alert(`Lỗi: ${response.data.message}`);
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi",
+          text: response.data.message || "Nộp CV thất bại.",
+        });
       }
     } catch (err) {
-      alert(`Lỗi khi nộp CV: ${err.response?.data?.message || err.message}`);
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: err?.response?.data?.message || "Có lỗi xảy ra khi nộp CV.",
+      });
     } finally {
-      setIsSubmittingCV(false); // Stop loading
+      setIsSubmittingCV(false);
     }
   };
 
@@ -191,12 +294,16 @@ const CompDetail = () => {
     setIsCVModalOpen(false);
     setSelectedCVId(null);
     setUploadedCV(null);
-    setIsSubmittingCV(false); // Reset loading state
+    setIsSubmittingCV(false);
   };
 
   const handleViewCandidatesClick = async () => {
     if (!id) {
-      alert("ID của bài viết không tồn tại!");
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: "ID của bài viết không tồn tại!",
+      });
       return;
     }
     setIsApplicationsModalOpen(true);
@@ -258,60 +365,144 @@ const CompDetail = () => {
       postId: post._id,
       title: post.title,
       content: post.content,
-      salary: post.salary,
-      address: post.address,
-      category: post.category || [],
+      category: {
+        "Mức lương": post.salary || "",
+        "Địa điểm": post.address || "",
+        "Kinh nghiệm": post.category?.[3] || "",
+        "Lĩnh vực": post.category?.[2] || "",
+        "Phương thức làm việc": post.category?.[4] || "",
+        "Hình thức làm việc": post.category?.[5] || "",
+      },
     });
     setIsEditModalOpen(true);
   };
 
+  const validateForm = () => {
+    let newErrors = {};
+
+    if (!formData.title.trim()) newErrors.title = "Tiêu đề không được để trống";
+    if (!formData.content.trim()) newErrors.content = "Nội dung không được để trống";
+
+    Object.keys(filterOptions).forEach((key) => {
+      if (!formData.category[key]) {
+        newErrors[key] = `Vui lòng chọn ${key.toLowerCase()}`;
+      }
+    });
+
+    setFormErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleEditSubmit = async () => {
+    if (!validateForm()) return;
+
     try {
+      const payload = {
+        postId: formData.postId,
+        title: formData.title,
+        content: formData.content,
+        salary: formData.category["Mức lương"],
+        address: formData.category["Địa điểm"],
+        category: Object.values(formData.category),
+      };
+
+      // Hiển thị loading
+      Swal.fire({
+        title: "Đang cập nhật công việc...",
+        text: "Vui lòng đợi trong giây lát.",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
       const response = await axios.post(
         `${API_URL}/recruiter/editPost`,
-        formData,
+        payload,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      alert("Bài đăng đã được cập nhật thành công!");
-      setIsEditModalOpen(false);
-      navigate("/recruiter");
+
+      if (response.data.success) {
+        Swal.fire({
+          icon: "success",
+          title: "Cập nhật công việc thành công!",
+          showConfirmButton: false,
+          timer: 3000,
+        });
+        setIsEditModalOpen(false);
+        navigate("/recruiter");
+      } else {
+        throw new Error("Cập nhật thất bại.");
+      }
     } catch (error) {
-      alert(
-        error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!"
-      );
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi",
+        text: error.response?.data?.message || "Có lỗi xảy ra khi cập nhật công việc!",
+      });
     }
   };
 
   const handleCloseEditModal = () => {
     setIsEditModalOpen(false);
+    setFormErrors({});
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
+  const handleInputChange = (field, value) => {
+    if (Object.keys(filterOptions).includes(field)) {
+      setFormData((prev) => ({
+        ...prev,
+        category: { ...prev.category, [field]: value },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
+
+    setFormErrors((prev) => ({
       ...prev,
-      [name]: name === "category" ? value.split(",") : value,
+      [field]: value ? "" : prev[field],
     }));
   };
 
   const handleDeleteClick = async (postId) => {
-    if (window.confirm("Bạn có chắc muốn xóa mục này?")) {
-      try {
-        await axios.post(
-          `${API_URL}/recruiter/deletePost`,
-          { postId },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        alert("Mục đã được xóa thành công!");
-        navigate("/recruiter");
-      } catch (error) {
-        alert(
-          error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!"
-        );
+    Swal.fire({
+      title: "Bạn có chắc muốn xóa mục này?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Vâng, xóa nó!",
+      cancelButtonText: "Hủy",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.post(
+            `${API_URL}/recruiter/deletePost`,
+            { postId },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          Swal.fire({
+            icon: "success",
+            title: "Xóa thành công!",
+            text: "Mục đã được xóa thành công!",
+            showConfirmButton: false,
+            timer: 3000,
+          });
+          navigate("/recruiter");
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Lỗi",
+            text: error.response?.data?.message || "Có lỗi xảy ra khi xóa công việc!",
+          });
+        }
       }
-    }
+    });
   };
 
   const handleReportClick = () => {
@@ -326,7 +517,13 @@ const CompDetail = () => {
   };
 
   const handleSubmitReport = () => {
-    alert("Đã báo cáo thành công!");
+    Swal.fire({
+      icon: "success",
+      title: "Báo cáo thành công!",
+      text: "Đã báo cáo thành công!",
+      showConfirmButton: false,
+      timer: 3000,
+    });
     setIsReportOpen(false);
     setSelectedReason("");
     setOtherReason("");
@@ -585,75 +782,65 @@ const CompDetail = () => {
           {isEditModalOpen && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white w-[90%] md:w-[600px] p-6 rounded-[20px] shadow-lg">
-                <h2 className="text-xl font-semibold mb-4">Chỉnh sửa bài đăng</h2>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Tiêu đề</label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    placeholder="Nhập tiêu đề"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Mô tả công việc</label>
-                  <textarea
-                    name="content"
-                    value={formData.content}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    rows="4"
-                    placeholder="Nhập mô tả công việc"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Mức lương</label>
-                  <input
-                    type="text"
-                    name="salary"
-                    value={formData.salary}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    placeholder="Nhập mức lương"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Địa điểm</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    placeholder="Nhập địa điểm"
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">Danh mục</label>
-                  <input
-                    type="text"
-                    name="category"
-                    value={formData.category.join(",")}
-                    onChange={handleInputChange}
-                    className="w-full p-2 border border-gray-300 rounded"
-                    placeholder="Nhập danh mục, cách nhau bằng dấu phẩy"
-                  />
-                </div>
-                <div className="flex justify-end gap-3">
-                  <button
-                    className="py-2 px-4 bg-gray-400 rounded hover:bg-gray-500"
-                    onClick={handleCloseEditModal}
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
-                    onClick={handleEditSubmit}
-                  >
-                    Lưu
-                  </button>
+                <h2 className="text-xl font-semibold mb-4">Chỉnh sửa công việc</h2>
+                <div className="flex flex-col gap-4">
+                  {/* Tiêu đề */}
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="text"
+                      placeholder="Tiêu đề công việc"
+                      value={formData.title}
+                      onChange={(e) => handleInputChange("title", e.target.value)}
+                      className="border p-2 rounded"
+                    />
+                    {formErrors.title && <p className="text-red-500">{formErrors.title}</p>}
+                  </div>
+
+                  {/* Nội dung */}
+                  <div className="flex flex-col gap-2">
+                    <textarea
+                      placeholder="Nhập nội dung chi tiết công việc"
+                      value={formData.content}
+                      onChange={(e) => handleInputChange("content", e.target.value)}
+                      className="border p-2 rounded"
+                      rows="4"
+                    />
+                    {formErrors.content && <p className="text-red-500">{formErrors.content}</p>}
+                  </div>
+
+                  {/* Các danh mục */}
+                  {Object.entries(filterOptions).map(([category, options]) => (
+                    <div key={category} className="flex flex-col gap-2">
+                      <label className="font-bold">{category}:</label>
+                      <select
+                        value={formData.category[category] || ""}
+                        onChange={(e) => handleInputChange(category, e.target.value)}
+                        className="border p-2 rounded"
+                      >
+                        <option value="">Chọn {category.toLowerCase()}</option>
+                        {options.map((option) => (
+                          <option key={option} value={option}>{option}</option>
+                        ))}
+                      </select>
+                      {formErrors[category] && <p className="text-red-500">{formErrors[category]}</p>}
+                    </div>
+                  ))}
+
+                  {/* Nút Submit */}
+                  <div className="flex justify-end gap-3">
+                    <button
+                      className="py-2 px-4 bg-gray-400 rounded hover:bg-gray-500"
+                      onClick={handleCloseEditModal}
+                    >
+                      Hủy
+                    </button>
+                    <button
+                      className="py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-600"
+                      onClick={handleEditSubmit}
+                    >
+                      Lưu
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
