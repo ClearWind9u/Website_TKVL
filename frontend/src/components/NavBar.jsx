@@ -33,13 +33,12 @@ const NavBar = () => {
     { path: "/recruiter/create", label: "Tạo công việc" },
     { path: "/recruiter/job", label: "Công việc đã tạo" },
     { path: "/recruiter/candidate", label: "Ứng viên" }
-  ] : [
+  ] : userInfo?.role === "jobseeker" ? [
     { path: "/jobseeker/homepage", label: "Trang chủ" },
     { path: "/jobseeker/profile", label: "Hồ sơ & CV" },
-    // { path: "/jobseeker/job", label: "Công việc" },
     { path: "/jobseeker/status", label: "Trạng thái" },
     { path: "/jobseeker/favor", label: "Yêu thích" }
-  ];
+  ] : [];
 
   return (
     <nav className="navBar flex justify-between items-center px-6 py-3 bg-white shadow-md">

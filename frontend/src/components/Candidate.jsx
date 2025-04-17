@@ -164,7 +164,7 @@ const Candidate = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-gray-100 shadow-md rounded-lg p-8 w-full max-w-7xl">
+      <div className="bg-gray-100 shadow-md rounded-lg p-8 w-full max-w-7xl m-10">
         <h1 className="text-3xl font-bold mb-6 text-center">Danh Sách</h1>
         {loading ? (
           <p className="text-center text-lg">Đang tải...</p>

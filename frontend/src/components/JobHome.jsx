@@ -4,20 +4,16 @@ import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { IoLocationOutline } from "react-icons/io5";
 import { IoHeartCircle } from "react-icons/io5";
 import { AiOutlineCloseCircle } from 'react-icons/ai';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { IoIosArrowDropleft, IoIosArrowDropright, IoIosArrowDropleftCircle, IoIosArrowDroprightCircle } from 'react-icons/io';
 import axios from 'axios';
-import { useLocation } from 'react-router-dom'; // Để lấy thông tin vị trí trang hiện tại
 import logo1 from '/company/vnglogo.png';
 
-const SingleJob = ({ id, title, salary, address, category, user_id,companyName }) => {
+const SingleJob = ({ id, title, salary, address, category, user_id, companyName }) => {
   const [isHoveredLove, setIsHoveredLove] = useState(false);
-  // const [userName, setUserName] = useState({companyName});
   const navigate = useNavigate();
-  // const { userInfo, token } = useContext(UserContext);
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const token = localStorage.getItem("TOKEN");
-  console.log(companyName);
 
   const handleJobClick = (id) => {
     if (userInfo.role === "jobseeker") {
@@ -67,23 +63,22 @@ const SingleJob = ({ id, title, salary, address, category, user_id,companyName }
 };
 
 const JobHome = () => {
-  const [jobs, setJobs] = useState([]); // State lưu danh sách công việc
-  const [loading, setLoading] = useState(true); // State theo dõi trạng thái loading
-  const [error, setError] = useState(null); // State lưu lỗi nếu có
-  const [selectedFilter, setSelectedFilter] = useState(''); // Bộ lọc đã chọn
-  const [showOptions, setShowOptions] = useState(false);  // Điều khiển việc hiển thị lựa chọn bộ lọc
-  const [selectedOptions, setSelectedOptions] = useState([]);  // Lưu các lựa chọn đã chọn
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedFilter, setSelectedFilter] = useState('');
+  const [showOptions, setShowOptions] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const jobsPerPage = 12;
+
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const token = localStorage.getItem("TOKEN");
   const API_URL = 'https://it-job-search-be.vercel.app';
-
   const location = useLocation();
-  //const isHomePage = location.pathname === '/';
 
-  // Các bộ lọc có thể chọn
   const filters = ["Kinh nghiệm", "Địa điểm", "Mức lương", "Lĩnh vực", "Phương thức làm việc", "Hình thức làm việc"];
 
-  // Tùy chọn của từng bộ lọc
   const filterOptions = {
     "Kinh nghiệm": ["Intern", "Fresher", "Junior", "Senior", "Leader", "Manager"],
     "Địa điểm": ["Hà Nội", "Hồ Chí Minh", "Đà Nẵng", "Cần Thơ", "Hải Phòng"],
@@ -96,6 +91,7 @@ const JobHome = () => {
   const handleFilterClick = (filter) => {
     setSelectedFilter(filter);
     setShowOptions(true);
+    setCurrentPage(1); // Reset về trang 1 khi thay đổi bộ lọc
   };
 
   const handleOptionClick = (option) => {
@@ -106,11 +102,7 @@ const JobHome = () => {
       } else {
         newSelected = [...prev, option];
       }
-
-      if (selectedFilter === "Lĩnh vực") {
-        fetchJobsByCategory(newSelected);
-      }
-
+      setCurrentPage(1); // Reset về trang 1 khi thay đổi lựa chọn
       return newSelected;
     });
   };
@@ -119,6 +111,7 @@ const JobHome = () => {
     setSelectedFilter('');
     setShowOptions(false);
     setSelectedOptions([]);
+    setCurrentPage(1); // Reset về trang 1 khi đóng bộ lọc
   };
 
   const [hoverLeft, setHoverLeft] = useState(false);
@@ -133,7 +126,7 @@ const JobHome = () => {
       }
 
       if (categories.length === 0) {
-        fetchJobs(); // Nếu không có danh mục, gọi API lấy tất cả công việc
+        fetchJobs();
         return;
       }
 
@@ -147,7 +140,7 @@ const JobHome = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setJobs(response.data?.data);
+      setJobs(response.data?.data || []);
     } catch (error) {
       console.error("Lỗi Axios:", error);
       setError(error.response?.data?.message || "Đã xảy ra lỗi.");
@@ -173,7 +166,7 @@ const JobHome = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setJobs(response.data?.data);
+      setJobs(response.data?.data || []);
     } catch (error) {
       console.error("Lỗi Axios:", error);
       setError(error.response?.data?.message || "Đã xảy ra lỗi.");
@@ -182,7 +175,6 @@ const JobHome = () => {
     }
   };
 
-  // useEffect duy nhất để gọi API
   useEffect(() => {
     if (!selectedOptions || selectedOptions.length === 0) {
       fetchJobs();
@@ -191,39 +183,54 @@ const JobHome = () => {
     }
   }, [selectedOptions]);
 
+  // Tính toán phân trang
+  const totalPages = Math.ceil(jobs.length / jobsPerPage);
+  const indexOfLastJob = currentPage * jobsPerPage;
+  const indexOfFirstJob = indexOfLastJob - jobsPerPage;
+  const currentJobs = jobs.slice(indexOfFirstJob, indexOfLastJob);
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
   return (
     <div className='w-[90%] m-auto'>
       <div className='TitleJobsection text-[30px] flex mt-5 justify-between items-center'>
-        {/* Hiển thị "Việc làm tốt nhất" nếu ở trang chủ, nếu không hiển thị "Yêu thích của tôi" */}
         <span>Các công việc hiện tại</span>
-        <span className='Dieuhuong flex items-center'>
-          {/* Icon left */}
+        <span className='Dieuhuong flex items-center gap-3'>
           <div
-            className='cursor-pointer'
-            onMouseEnter={() => setHoverLeft(true)}
+            className={`cursor-pointer ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onMouseEnter={() => currentPage !== 1 && setHoverLeft(true)}
             onMouseLeave={() => setHoverLeft(false)}
+            onClick={handlePrevPage}
           >
-            {hoverLeft ? <IoIosArrowDropleftCircle /> : <IoIosArrowDropleft />}
+            {hoverLeft && currentPage !== 1 ? <IoIosArrowDropleftCircle /> : <IoIosArrowDropleft />}
           </div>
-
-          {/* Icon right */}
+          <span className="text-lg">
+            Trang {currentPage}/{totalPages}
+          </span>
           <div
-            className='cursor-pointer ml-2'
-            onMouseEnter={() => setHoverRight(true)}
+            className={`cursor-pointer ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onMouseEnter={() => currentPage !== totalPages && setHoverRight(true)}
             onMouseLeave={() => setHoverRight(false)}
+            onClick={handleNextPage}
           >
-            {hoverRight ? <IoIosArrowDroprightCircle /> : <IoIosArrowDropright />}
+            {hoverRight && currentPage !== totalPages ? <IoIosArrowDroprightCircle /> : <IoIosArrowDropright />}
           </div>
         </span>
       </div>
 
       <div className="Filter-Total">
-        {/* Bộ lọc tổng */}
         <div className="filter-container text-[30px] flex mt-5 justify-between items-center w-full border-2 border-black rounded-[20px] p-3">
-          {/* Lọc theo */}
           <li className="filter-list p-2 text-[25px]">Lọc theo:</li>
-
-          {/* Các bộ lọc có thể chọn */}
           {filters.map((filter, index) => (
             <li
               key={index}
@@ -235,10 +242,8 @@ const JobHome = () => {
           ))}
         </div>
 
-        {/* Hiển thị khi người dùng chọn bộ lọc */}
         {showOptions && selectedFilter && (
           <div className="filter-container flex items-center justify-between mt-3">
-            {/* Div 1: Lọc theo và bộ lọc đã chọn */}
             <div className="flex items-center">
               <li className="filter-list p-2 text-[25px]">Lọc theo:</li>
               <li className="filter-list p-2 text-[25px]">{selectedFilter}</li>
@@ -247,8 +252,6 @@ const JobHome = () => {
                 onClick={handleCloseFilter}
               />
             </div>
-
-            {/* Div 2: Các tùy chọn bộ lọc */}
             <div className="overflow-x-auto flex space-x-3 py-2">
               {filterOptions[selectedFilter].map((option, index) => (
                 <div
@@ -268,12 +271,12 @@ const JobHome = () => {
           <div>Đang tải...</div>
         ) : error ? (
           error === "No posts found in these categories" ? (
-            <div>Không có công việc phù hợp</div> // Xử lý lỗi không có bài đăng
+            <div>Không có công việc phù hợp</div>
           ) : (
-            <div className="text-red-500">Có lỗi khi lấy dữ liệu</div> // Xử lý lỗi khác
+            <div className="text-red-500">Có lỗi khi lấy dữ liệu</div>
           )
-        ) : jobs.length > 0 ? (
-          jobs.map((job) => (
+        ) : currentJobs.length > 0 ? (
+          currentJobs.map((job) => (
             <SingleJob
               key={job._id}
               id={job._id}
@@ -287,7 +290,7 @@ const JobHome = () => {
             />
           ))
         ) : (
-          <div>Không có công việc phù hợp</div> // Trường hợp không có dữ liệu
+          <div>Không có công việc phù hợp</div>
         )}
       </div>
     </div>
