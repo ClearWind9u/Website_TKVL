@@ -18,11 +18,16 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Jobseeker from "./Layout/Jobseeker";
 import Admin from "./Layout/Admin";
 import Recruiter from "./Layout/Recruiter";
+import ManaAccount from "./components/ManaAccount";
+import AddRecuiter from "./components/AddRecruiter";
 const App = () => {
 
   const role = localStorage.getItem("ROLE")
-  const hideImgBg = ["/","/login", "/register"].includes(window.location.pathname); //Nếu đường dẫn là /login hoặc /register thì ẩn ảnh nền
-  return (
+  const hideFooter = window.location.pathname.startsWith("/admin");
+  const path = window.location.pathname;
+  const hideImgBg = ["/", "/login", "/register"].includes(path) || path.startsWith("/admin");
+  //Nếu đường dẫn là /login hoặc /register thì ẩn ảnh nền
+  return (  
     <div className="flex flex-col min-h-screen">
       <Router>
         <NavBar />
@@ -46,7 +51,7 @@ const App = () => {
               <ProtectedRoute name="jobseeker">
                 <Jobseeker />
               </ProtectedRoute>
-            }>  
+            }>
               <Route index element={<Navigate to="/jobseeker/homepage" replace />} />
               <Route path="homepage" element={<Home />} />
               <Route path="profile" element={<Profile />} />
@@ -74,14 +79,17 @@ const App = () => {
               </ProtectedRoute>
             }>
               <Route index element={<Navigate to="/admin/homepage" replace />} />
-              <Route path="homepage" element={<Home />} />
+              <Route path="homepage" element={<ManaAccount />} />
+              <Route path="addRecuiter" element={<AddRecuiter />} />
+              <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="/jobDetail/:id" element={<CompDetail />} />
             <Route path="/candidate:id" element={<Candidate />} />
             <Route path="*" element={<Login />} />
           </Routes>
         </div>
-        <Footer />
+        {!hideFooter && <Footer />}
+        {/* <Footer /> */}
       </Router>
     </div>
   );

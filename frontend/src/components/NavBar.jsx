@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineBell } from 'react-icons/ai';
 import { FaUserCircle } from 'react-icons/fa';
@@ -7,6 +7,8 @@ import { UserContext } from "../userContext/userContext";
 
 const NavBar = () => {
   const navigate = useNavigate();
+  const avtRef = useRef(null);
+  const divRef = useRef(null);
   const { logout } = useContext(UserContext);
   const userInfo = JSON.parse(localStorage.getItem("USER"));
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
@@ -27,6 +29,17 @@ const NavBar = () => {
   const handleBellClick = () => {
     setIsOpen(!isOpen);
   }
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (divRef.current && (!divRef.current.contains(event.target) && !avtRef.current.contains(event.target))) {
+        setIsDropdownVisible(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const menuItems = userInfo?.role === "recruiter" ? [
     { path: "/recruiter/homepage", label: "Trang chủ" },
@@ -75,17 +88,24 @@ const NavBar = () => {
               )}
             </div>
             <div className="flex items-center gap-2">
-              <div className="relative" onClick={handleAvatarClick}>
+              <div ref={avtRef} className="relative" onClick={handleAvatarClick}>
                 {userInfo.avatar ? (
                   <img src={userInfo.avatar} alt="Avatar" className="w-[35px] h-[35px] rounded-full border cursor-pointer" />
                 ) : (
                   <FaUserCircle className="w-[35px] h-[35px] text-gray-500 cursor-pointer" />
                 )}
               </div>
-              <span className="text-sm text-gray-600">{userInfo.role === "recruiter" ? "Nhà tuyển dụng" : "Người tìm việc"}</span>
+              <span className="text-sm text-gray-600">
+                {userInfo.role === "recruiter"
+                  ? "Nhà tuyển dụng"
+                  : userInfo.role === "admin"
+                    ? "Quản trị viên"
+                    : "Người tìm việc"}
+              </span>
+
             </div>
             {isDropdownVisible && (
-              <div className="absolute top-[50px] right-0 bg-white border-2 border-gray-300 rounded-lg w-[250px] shadow-md p-4 z-9999">
+              <div ref={divRef} className="absolute top-[50px] right-0 bg-white border-2 border-gray-300 rounded-lg w-[250px] shadow-md p-4 z-9999">
                 <div className="flex flex-col items-center gap-3 mb-4">
                   {userInfo.avatar ? (
                     <img src={userInfo.avatar} alt="User Avatar" className="w-[80px] h-[80px] rounded-full object-cover" />
