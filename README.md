@@ -53,3 +53,7 @@ npm run dev
     - **Email:** testRecruiter@gmail.com
     - **Password:** 123456
     - **Role:** recruiter
+  - **Quản trị viên**
+    - **Email:** testadmin@gmail.com
+    - **Password:** 123456
+    - **Role:** admin
