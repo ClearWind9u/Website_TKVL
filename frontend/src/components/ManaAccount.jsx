@@ -11,6 +11,7 @@ const ManaAccount = () => {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [listAccount, setListAccount] = useState([]);
     const token = localStorage.getItem("TOKEN");
+    const API_URL = 'https://it-job-search-be.vercel.app';
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -19,6 +20,7 @@ const ManaAccount = () => {
 
         return () => clearTimeout(handler);
     }, [searchTerm]);
+
     useEffect(() => {
         const fetchListAccount = async () => {
             try {
@@ -30,7 +32,7 @@ const ManaAccount = () => {
                     },
                 });
 
-                const response = await axios.get("http://localhost:5000/admin/viewAllUser", {
+                const response = await axios.get(`${API_URL}/admin/viewAllUser`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
@@ -53,8 +55,6 @@ const ManaAccount = () => {
         fetchListAccount();
     }, []);
 
-
-
     const filteredRows = listAccount.filter((listAccount) => {
         const matchesRole =
             roleFilter === "all" ? true : listAccount.role === roleFilter;
@@ -65,6 +65,7 @@ const ManaAccount = () => {
 
         return matchesRole && matchesSearch;
     });
+
     const handleRole = (role) => {
         switch (role) {
             case "jobseeker":
@@ -76,14 +77,16 @@ const ManaAccount = () => {
             default:
                 return role;
         }
-    }
+    };
+
     const handleNaviAddRecuiter = () => {
         navigate("/admin/addRecuiter");
     };
+
     const handleDelete = async (email) => {
         const data = {
             userEmail: email
-        }
+        };
         const result = await Swal.fire({
             title: "Bạn có chắc muốn xóa?",
             text: "Thao tác này không thể hoàn tác!",
@@ -94,14 +97,13 @@ const ManaAccount = () => {
             confirmButtonText: "Xóa",
             cancelButtonText: "Hủy",
         });
+
         if (result.isConfirmed) {
-            // gọi lại handleDelete tại đây
-
-
             try {
-                const response = await axios.post(`http://localhost:5000/admin/deleteUser`, data, {
+                const response = await axios.post(`${API_URL}/admin/deleteUser`, data, {
                     headers: {
-                        Authorization: `Bearer ${token}`
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
                     },
                 });
 
@@ -116,7 +118,7 @@ const ManaAccount = () => {
                 Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa người dùng", "error");
             }
         }
-    }
+    };
 
     return (
         <div className="py-6 px-[40px] mt-2">
@@ -198,18 +200,18 @@ const ManaAccount = () => {
                             filteredRows.map((row, index) => (
                                 <tr key={index} className="  border-y border-gray-300 hover:bg-gray-50">
                                     <td className="h-[45px] text-center">
-
                                         {row.userName}
                                     </td>
                                     <td className="h-[45px] text-center">{row.userEmail}</td>
                                     <td className="h-[45px] text-center">{handleRole(row.role)}</td>
                                     <td className="h-[45px] text-center">{row.address}</td>
-                                    <td onClick={() => handleDelete(row.userEmail)} className="h-[45px] flex justify-center items-center cursor-pointer"><img className="h-[30px] " src={deleteIcon} alt="delete" /></td>
+                                    <td onClick={() => handleDelete(row.userEmail)} className="h-[45px] flex justify-center items-center cursor-pointer">
+                                        <img className="h-[30px] " src={deleteIcon} alt="delete" />
+                                    </td>
                                 </tr>
                             ))
                         )}
                     </tbody>
-
                 </table>
             </div>
         </div>
