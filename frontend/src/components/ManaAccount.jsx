@@ -82,25 +82,39 @@ const ManaAccount = () => {
     };
     const handleDelete = async (email) => {
         const data = {
-            email: email
+            userEmail: email
         }
-        try {
-            const response = await axios.post(`http://localhost:5000/admin/deleteUser`,data, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-            });
+        const result = await Swal.fire({
+            title: "Bạn có chắc muốn xóa?",
+            text: "Thao tác này không thể hoàn tác!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy",
+        });
+        if (result.isConfirmed) {
+            // gọi lại handleDelete tại đây
 
-            if (response.status === 200) {
-                Swal.fire("Thành công", "Xóa người dùng thành công", "success");
-                setListAccount((prevList) => prevList.filter((user) => user.email !== email));
-            } else {
-                Swal.fire("Lỗi", "Không thể xóa người dùng", "error");
+
+            try {
+                const response = await axios.post(`http://localhost:5000/admin/deleteUser`, data, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    },
+                });
+
+                if (response.status === 200) {
+                    Swal.fire("Thành công", "Xóa người dùng thành công", "success");
+                    setListAccount((prevList) => prevList.filter((user) => user.userEmail !== email));
+                } else {
+                    Swal.fire("Lỗi", "Không thể xóa người dùng", "error");
+                }
+            } catch (error) {
+                console.error("Lỗi khi xóa người dùng:", error);
+                Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa người dùng", "error");
             }
-        } catch (error) {
-            console.error("Lỗi khi xóa người dùng:", error);
-            Swal.fire("Lỗi", "Đã xảy ra lỗi khi xóa người dùng", "error");
         }
     }
 
@@ -184,13 +198,13 @@ const ManaAccount = () => {
                             filteredRows.map((row, index) => (
                                 <tr key={index} className="  border-y border-gray-300 hover:bg-gray-50">
                                     <td className="h-[45px] text-center">
-                                            
-                                            {row.userName}
+
+                                        {row.userName}
                                     </td>
                                     <td className="h-[45px] text-center">{row.userEmail}</td>
                                     <td className="h-[45px] text-center">{handleRole(row.role)}</td>
                                     <td className="h-[45px] text-center">{row.address}</td>
-                                    <td onClick={()=>handleDelete(row.userEmail)} className="h-[45px] flex justify-center items-center cursor-pointer"><img className="h-[30px] " src={deleteIcon} alt="delete" /></td>
+                                    <td onClick={() => handleDelete(row.userEmail)} className="h-[45px] flex justify-center items-center cursor-pointer"><img className="h-[30px] " src={deleteIcon} alt="delete" /></td>
                                 </tr>
                             ))
                         )}
